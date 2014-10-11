@@ -62,6 +62,16 @@ install_automake()
 
 }
 
+install_default_autogen_input()
+{
+    if [ ! -f "${BASE_DIR?}/autogen.input.base" ] ; then
+	cat > "${BASE_DIR?}/autogen.input.base" <<EOF
+--with-junit="${BASE_DIR?}/opt/share/java/junit.jar"
+--with-external-tar="${BASE_DIR?}/ext_tar"
+EOF
+    fi
+}
+
 install_doxygen()
 {
     local doxygen_version=doxygen-1.8.8
@@ -125,6 +135,7 @@ install_build_dep()
     install_ant
     install_junit
     install_doxygen
+    install_default_autogen_input
 }
 
 os_flavor_notes()

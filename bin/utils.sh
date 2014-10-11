@@ -141,6 +141,15 @@ setup_adm_repos()
     popd > /dev/null
 }
 
+setup_jenkins_slave()
+{
+    pushd "${BASE_DIR?}" > /dev/null
+    test_git_or_clone slave git://gerrit.libreoffice.org/core || die "Error clone core for slave build"
+    if [ -f autogen.input.base ] ; then
+        cp autogen.input.base > slave/autogen.input
+    fi
+}
+
 display_prereq()
 {
     os_prereq

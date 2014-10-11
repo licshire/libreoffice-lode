@@ -21,11 +21,13 @@ source "$BASE_DIR/bin/utils.sh"
 do_help()
 {
 cat <<EOF
-setup [ --help ] [ -v ] [ --prereq ]
+setup [ --help ] [ -v ] [ --prereq ] [ --slave ]
 
 setup the necessary environment to build.
 run --prereq first to determine if your os version is currently supported by the tool
 it will also tell you the list of thing, if any that need to be done prior to running the setup
+
+--slave clone core.git in ./slave  to be used by jenkins slaves.
 
 EOF
 }
@@ -37,6 +39,7 @@ EOF
 
 V=0
 DO_PREREQ=0
+DO_SLAVE=0
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -55,6 +58,9 @@ while [ "${1}" != "" ]; do
             ;;
         -p|--prereq)
             DO_PREREQ=1
+            ;;
+        --slave)
+            DO_SLAVE=1
             ;;
         -v)  # print more messages
             V=1
@@ -82,5 +88,8 @@ setup_adm_repos
 
 install_build_dep
 
+if [ "$DO_SLAVE" = "1" ] ; then
+    setup_jenkins_slave
+fi
 
 final_notes
