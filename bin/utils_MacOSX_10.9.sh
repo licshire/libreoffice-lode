@@ -39,8 +39,8 @@ install_junit()
 
 install_build_dep()
 {
-    install_generic_conf_make_install "autoconf" "2.54" "http://mirrors.kernel.org/gnu/autoconf" "autoconf-2.54.tar.gz"
-    install_generic_conf_make_install "automake" "1.11" "http://mirrors.kernel.org/gnu/automake" "automake-2.54.tar.gz"
+    install_generic_conf_make_install "autoconf" "2.69" "http://mirrors.kernel.org/gnu/autoconf" "autoconf-2.69.tar.gz"
+    install_generic_conf_make_install "automake" "1.14" "http://mirrors.kernel.org/gnu/automake" "automake-1.14.tar.gz"
     install_generic_conf_make_install "make" "4.1" "http://mirrors.kernel.org/gnu/make" "make-4.1.tar.gz"
     install_ant
     install_junit

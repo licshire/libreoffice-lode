@@ -84,7 +84,7 @@ install_generic_conf_make_install()
     if [ -z "${module}" -o -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
         die "Mssing/Invalid parameter to install_generic_conf_make_install()"
     fi
-    if [ ! -x "${BASE_DIR?}/opt/bin/${module?}" ] ; then
+    if [ ! -x "${BASE_DIR?}/opt/bin/${module?}" -o ! -f "${BASE_DIR?}/packages/${module?}-${version?}" ] ; then
         pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
         rm -fr "${BASE_DIR?}/packages/${module?}-${version?}"
         rm -f "${BASE_DIR?}/packages/${fn?}"
