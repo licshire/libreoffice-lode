@@ -1,5 +1,17 @@
 
 
+get_remote_file()
+{
+    local url="$1"
+    local f="$2"
+
+    if [ -n "$f" ] ; then
+	curl -O ${url?} -o ${f?} || die "Error download ${module?} source package"
+    else
+	curl -O ${url?} || die "Error download ${module?} source package"
+    fi
+}
+
 os_prereq()
 {
 cat <<EOF
