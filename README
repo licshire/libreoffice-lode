@@ -1,0 +1,17 @@
+
+Libreoffice build environment setup utility
+
+Pre-Requesites:
+
+For Mac:
+
+Make sure you have xcode installed, and that you ran in once and accepted the license.
+Make sure you have a java JDK installed. to check just run 'java', if it was not installed that should prompt you with a dialog follow the instructions to install a JDK
+
+
+
+Usage:
+
+from the base directiretory of this git repo, run ./setup --help
+
+

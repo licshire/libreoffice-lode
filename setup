@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# -*- tab-width : 4; indent-tabs-mode : nil -*-
+#
+#    Copyright (C) 2011-2013 Norbert Thiebaud
+#    License: GPLv3
+#
+
+# run debug=1 setup ... to debug
+if [ -n "$debug" ] ; then
+    set -x
+fi
+
+# get the abolute path to the directory containing the main script
+BASE_DIR=$(dirname "$0")
+pushd ${BASE_DIR} > /dev/null
+BASE_DIR=$(pwd)
+popd > /dev/null
+
+source "$BASE_DIR/bin/utils.sh"
+
+do_help()
+{
+cat <<EOF
+setup [ --help ] [ -v ] [ --prereq ]
+
+setup the necessary environment to build.
+run --prereq first to determine if your os version is currently supported by the tool
+it will also tell you the list of thing, if any that need to be done prior to running the setup
+
+EOF
+}
+
+
+#
+# Main
+#
+
+V=0
+DO_PREREQ=0
+
+while [ "${1}" != "" ]; do
+    parm=${1%%=*}
+    arg=${1#*=}
+    has_arg=
+    if [ "${1}" != "${parm?}" ] ; then
+        has_arg=1
+    else
+        arg=""
+    fi
+
+    case "${parm}" in
+        -h|--help)  # display help
+            do_help
+            exit
+            ;;
+        -p|--prereq)
+            DO_PREREQ=1
+            ;;
+        -v)  # print more messages
+            V=1
+            ;;
+        -*)
+            die "Invalid option $1"
+            ;;
+        *)
+            die "Invalid argument $1"
+            ;;
+    esac
+    shift
+done
+
+determine_os  # this will overload the usefull bits based on the machine we run on
+
+if [ "$DO_PREREQ" = "1" ] ; then
+    display_prereq
+    exit 0;
+fi
+
+setup_base_tree
+
+setup_adm_repos
+
+install_build_dep
+
+
+final_notes
