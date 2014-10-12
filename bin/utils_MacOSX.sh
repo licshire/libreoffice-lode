@@ -5,8 +5,8 @@ os_prereq()
 cat <<EOF
 
 For MacOSX you need to install XCode ( https://developer.apple.com/xcode/ ) and run it once to accept the license.
-You also need to install a JDK. ( http://www.oracle.com/technetwork/java/javase/downloads/index.html )
-
+You also need to install a Java, see  http://support.apple.com/kb/dl1572
+http://support.apple.com/downloads/DL1572/en_US/JavaForOSX2014-001.dmg
 EOF
 }
 

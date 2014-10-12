@@ -74,6 +74,34 @@ test_git_or_clone()
     fi
 }
 
+install_generic_conf_make_install()
+{
+    local module="$1"
+    local version="$2"
+    local base_url="$3"
+    local fn="$4"
+
+    if [ -z "${module}" -o -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
+        die "Mssing/Invalid parameter to install_generic_conf_make_install()"
+    fi
+    if [ ! -x "${BASE_DIR?}/opt/bin/${module?}" ] ; then
+        pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
+        rm -fr "${BASE_DIR?}/packages/${module?}-${version?}"
+        rm -f "${BASE_DIR?}/packages/${fn?}"
+        curl -O ${base_url?}/${fn?} || die "Error download ${module?} source package"
+        tar -xf ${fn?} || die "Error untaring ${module?} source"
+        pushd ${module?}-${version?} > /dev/null
+        ./configure --prefix=${BASE_DIR}/opt || die "Error configuring ${module?}"
+        make || die "error building ${module?}"
+        make install || die "error installing ${module?}"
+        popd > /dev/null
+        popd > /dev/null
+        echo "${module?} Installed" 1>&2
+    else
+        echo "${module?} already installed" 1>&2
+    fi
+}
+
 determin_os_flavor()
 {
     OS_FLAVOR="Unknown"
@@ -146,7 +174,10 @@ setup_jenkins_slave()
     pushd "${BASE_DIR?}" > /dev/null
     test_git_or_clone slave git://gerrit.libreoffice.org/core || die "Error clone core for slave build"
     if [ -f autogen.input.base ] ; then
-        cp autogen.input.base > slave/autogen.input
+        if [ slave/autogen.input ] ; then
+            mv slave/autogen.input slave/autogen.input.bak
+        fi
+        cp autogen.input.base  slave/autogen.input
     fi
 }
 

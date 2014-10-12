@@ -18,81 +18,12 @@ install_ant()
     
 }
 
-install_autoconf()
-{
-    local autoconf_version=autoconf-2.54
-    if [ ! -x "${BASE_DIR?}/opt/bin/autoconf" ] ; then
-	pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
-	rm -fr "${BASE_DIR?}/packages/${autoconf_version?}"
-	rm -f "${BASE_DIR?}/packages/${autoconf_version?}.tar.gz"
-	curl -O http://mirrors.kernel.org/gnu/autoconf/${autoconf_version?}.tar.gz || die "Error download autoconf source package"
-	tar -xf ${autoconf_version?}.tar.gz || die "Error untaring autoconf source"
-	pushd ${autoconf_version?} > /dev/null
-	./configure --prefix=${BASE_DIR}/opt || die "Error configuring autoconf"
-	make || die "error building autoconf"
-	make install || die "error installing autoconf"
-	popd > /dev/null
-	popd > /dev/null
-	echo "autoconf Installed" 1>&2
-    else
-	echo "autoconf already installed" 1>&2
-    fi
-}
-
-install_automake()
-{
-    local automake_version=automake-1.11
-
-    if [ ! -x "${BASE_DIR?}/opt/bin/automake" ] ; then
-	pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
-	rm -fr "${BASE_DIR?}/packages/${automake_version?}"
-	rm -f "${BASE_DIR?}/packages/${automake_version?}.tar.gz"
-	curl -O http://mirrors.kernel.org/gnu/automake/${automake_version?}.tar.gz || die "Error download automake source package"
-	tar -xf ${automake_version?}.tar.gz || die "Error untaring automake source"
-	pushd ${automake_version?} > /dev/null
-	./configure --prefix=${BASE_DIR}/opt || die "Error configuring automake"
-	make || die "error building automake"
-	make install || die "error installing automake"
-	popd > /dev/null
-	popd > /dev/null
-	echo "automake Installed" 1>&2
-    else
-	echo "automake already installed" 1>&2
-    fi
-
-}
-
 install_default_autogen_input()
 {
-    if [ ! -f "${BASE_DIR?}/autogen.input.base" ] ; then
-	cat > "${BASE_DIR?}/autogen.input.base" <<EOF
---with-junit="${BASE_DIR?}/opt/share/java/junit.jar"
---with-external-tar="${BASE_DIR?}/ext_tar"
+    cat > "${BASE_DIR?}/autogen.input.base" <<EOF
+--with-junit=${BASE_DIR?}/opt/share/java/junit.jar
+--with-external-tar=${BASE_DIR?}/ext_tar
 EOF
-    fi
-}
-
-install_doxygen()
-{
-    local doxygen_version=doxygen-1.8.8
-
-    if [ ! -x "${BASE_DIR?}/opt/bin/doxygen" ] ; then
-	pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
-	rm -fr "${BASE_DIR?}/packages/${doxygen_version?}"
-	rm -f "${BASE_DIR?}/packages/${doxygen_version?}.src.tar.gz"
-	curl -O http://ftp.stack.nl/pub/users/dimitri/${doxygen_version?}.src.tar.gz || die "Error download doxygen source package"
-	tar -xf ${doxygen_version?}.src.tar.gz || die "Error untaring doxygen source"
-	pushd ${doxygen_version?} > /dev/null
-	./configure --prefix=${BASE_DIR}/opt || die "Error configuring doxygen"
-	make || die "error building doxygen"
-	make install || die "error installing doxygen"
-	popd > /dev/null
-	popd > /dev/null
-	echo "doxygen Installed" 1>&2
-    else
-	echo "doxygen already installed" 1>&2
-    fi
-
 }
 
 install_junit()
@@ -106,35 +37,15 @@ install_junit()
     fi
 }
 
-install_make()
-{
-    local make_version=make-4.1
-    if [ ! -x "${BASE_DIR?}/opt/bin/make" ] ; then
-	pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
-	rm -fr "${BASE_DIR?}/packages/${make_version?}"
-	rm -f "${BASE_DIR?}/packages/${make_version?}.tar.gz"
-	curl -O http://mirrors.kernel.org/gnu/make/${make_version?}.tar.gz || die "Error download make source package"
-	tar -xf ${make_version?}.tar.gz || die "Error untaring make source"
-	pushd ${make_version?} > /dev/null
-	./configure --prefix=${BASE_DIR}/opt || die "Error configuring make"
-	make || die "error building make"
-	make install || die "error installing make"
-	popd > /dev/null
-	popd > /dev/null
-	echo "make Installed" 1>&2
-    else
-	echo "make already installed" 1>&2
-    fi
-}
-
 install_build_dep()
 {
-    install_autoconf
-    install_automake
-    install_make
+    install_generic_conf_make_install "autoconf" "2.54" "http://mirrors.kernel.org/gnu/autoconf" "autoconf-2.54.tar.gz"
+    install_generic_conf_make_install "automake" "1.11" "http://mirrors.kernel.org/gnu/automake" "automake-2.54.tar.gz"
+    install_generic_conf_make_install "make" "4.1" "http://mirrors.kernel.org/gnu/make" "make-4.1.tar.gz"
     install_ant
     install_junit
-    install_doxygen
+    install_generic_conf_make_install "doxygen" "1.8.8" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.8.src.tar.gz"
+    install_generic_conf_make_install "ccache" "3.1.9" "http://www.samba.org/ftp/ccache" "ccache-3.1.9.tar.gz"
     install_default_autogen_input
 }
 
