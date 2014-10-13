@@ -74,6 +74,34 @@ test_git_or_clone()
     fi
 }
 
+test_git_or_bare_mirror()
+{
+    # test if a git repo exist, if not clone it
+    # you need to have the current working dir be where you want to clone
+    local g="$1"
+    local remote="$2"
+
+    if [ -n "${g}" -a -n "${remote}" ] ; then
+        if [ -d "${g}.git" ] ; then
+            if [ -f "${g}.git/HEAD" ] ; then
+                echo "git repo '$(pwd)/$g.git' exist" 1>&2
+            else
+                echo "Error $(pwd)/${g}.git is a directory but not a git repo" 1>&2
+                exit 1
+            fi
+        else
+            git clone --bare --mirror "${remote}" "${g}.git"
+            if [ $? = "0" ] ; then
+                echo "Cloned mirror $(pwd)/${g}.git" 1>&2
+            else
+                echo "Error Cloning mirror $(pwd)/${g}.git" 1>&2
+                rm -fr "${g}.git"
+                exit 1
+            fi
+        fi
+    fi
+}
+
 install_generic_conf_make_install()
 {
     local module="$1"
@@ -130,7 +158,7 @@ os_flavor_prereq()
 determine_os()
 {
     base_os=$(uname)
-    
+
     case "$base_os" in
     Darwin)
         OS="MacOSX"
@@ -143,7 +171,7 @@ determine_os()
         ;;
     esac
     OS_FLAVOR=""
-    
+
     if [ -f "${BASE_DIR?}/bin/utils_${OS?}.sh" ] ; then
         source "${BASE_DIR?}/bin/utils_${OS?}.sh"
     fi
@@ -172,13 +200,9 @@ setup_adm_repos()
 setup_jenkins_slave()
 {
     pushd "${BASE_DIR?}" > /dev/null
-    test_git_or_clone slave git://gerrit.libreoffice.org/core || die "Error clone core for slave build"
-    if [ -f autogen.input.base ] ; then
-        if [ slave/autogen.input ] ; then
-            mv slave/autogen.input slave/autogen.input.bak
-        fi
-        cp autogen.input.base  slave/autogen.input
-    fi
+    test_create_dirs jenkins mirrors
+    pushd mirrors > /dev/null || die "Error switch to mirrors"
+    test_git_or_bare_mirror core git://gerrit.libreoffice.org/core
 }
 
 display_prereq()

@@ -4,6 +4,7 @@ ext_tar/
 packages/
 opt/
 tb/
-slave/
+jenkins/
 rel/
 dev/
+mirrors/
