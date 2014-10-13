@@ -205,6 +205,13 @@ setup_jenkins_slave()
     test_git_or_bare_mirror core git://gerrit.libreoffice.org/core
 }
 
+install_build_dep()
+{
+    echo "***********" >&1
+    echo "WARNING**** Install Build Dep is not supported yet on this platform ****" 2>&1
+    echo "***********" >&1
+}
+
 display_prereq()
 {
     os_prereq
