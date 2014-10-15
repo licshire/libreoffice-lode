@@ -1,15 +1,4 @@
-
-get_remote_file()
-{
-    local url="$1"
-    local f="$2"
-
-    if [ -n "$f" ] ; then
-	wget -O ${f?} ${url?} || die "Error download ${module?} source package"
-    else
-wget ${url?} || die "Error download ${module?} source package"
-    fi
-}
+# -*- tab-width : 4; indent-tabs-mode : nil -*-
 
 install_default_autogen_input()
 {

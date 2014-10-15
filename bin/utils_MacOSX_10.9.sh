@@ -1,22 +1,5 @@
+# -*- tab-width : 4; indent-tabs-mode : nil -*-
 
-
-install_ant()
-{
-    local ant_version=apache-ant-1.9.4
-
-    if [ ! -x "${BASE_DIR?}/opt/bin/ant" ] ; then
-	pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
-	rm -fr "${BASE_DIR?}/packages/${ant_version?}"
-	rm -f "${BASE_DIR?}/packages/${ant_version?}-bin.zip"
-	curl -O http://archive.apache.org/dist/ant/binaries/${ant_version?}-bin.zip || die "Error downloading ant"
-	unzip ${ant_version?}-bin.zip || die "Error unziping ant"
-	ln -s "${BASE_DIR?}/packages/${ant_version?}/bin/ant" "${BASE_DIR}/opt/bin/ant" || die "Error soft-linking ant"
-	echo "ant Installed" 1>&2
-    else
-	echo "ant already installed" 1>&2
-    fi
-    
-}
 
 install_default_autogen_input()
 {
@@ -24,17 +7,6 @@ install_default_autogen_input()
 --with-junit=${BASE_DIR?}/opt/share/java/junit.jar
 --with-external-tar=${BASE_DIR?}/ext_tar
 EOF
-}
-
-install_junit()
-{
-    if [ -f "${BASE_DIR?}/opt/share/java/junit.jar" ] ; then
-	echo "junit Already Installed" 1>&2
-    else
-	test_create_dirs "${BASE_DIR?}/opt/share" "${BASE_DIR?}/opt/share/java"
-	curl -o "${BASE_DIR?}/opt/share/java/junit.jar" -O#L "https://github.com/downloads/junit-team/junit/junit-4.11.jar" || die "Error downloading junit"
-	echo "junit Installed" 1>&2
-    fi
 }
 
 install_build_dep()

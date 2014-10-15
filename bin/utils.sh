@@ -43,6 +43,19 @@ test_create_dirs()
     done
 }
 
+
+get_remote_file()
+{
+    local url="$1"
+    local f="$2"
+
+    if [ -n "$f" ] ; then
+       wget -O ${f?} ${url?} || die "Error download ${module?} source package"
+    else
+        wget ${url?} || die "Error download ${module?} source package"
+    fi
+}
+
 test_git_or_clone()
 {
     # test if a git repo exist, if not clone it
@@ -165,7 +178,41 @@ install_generic_conf_make_install()
     fi
 }
 
-determin_os_flavor()
+install_ant()
+{
+    local ant_version=apache-ant-1.9.4
+
+    if [ ! -x "${BASE_DIR?}/opt/bin/ant" ] ; then
+        pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
+        rm -fr "${BASE_DIR?}/packages/${ant_version?}"
+        rm -f "${BASE_DIR?}/packages/${ant_version?}-bin.zip"
+        get_remote_file "http://archive.apache.org/dist/ant/binaries/${ant_version?}-bin.zip"
+        unzip ${ant_version?}-bin.zip || die "Error unziping ant"
+        ln -s "${BASE_DIR?}/packages/${ant_version?}/bin/ant" "${BASE_DIR}/opt/bin/ant" || die "Error soft-linking ant"
+        echo "ant Installed" 1>&2
+    else
+        echo "ant already installed" 1>&2
+    fi
+
+}
+
+install_junit()
+{
+    if [ -f "${BASE_DIR?}/opt/share/java/junit.jar" ] ; then
+        echo "junit Already Installed" 1>&2
+    else
+        test_create_dirs "${BASE_DIR?}/opt/share" "${BASE_DIR?}/opt/share/java"
+        which wget > /dev/null 2> /dev/null
+        if [ "$?" = "0" ] ; then
+            wget -O "${BASE_DIR?}/opt/share/java/junit.jar" http://downloads.sourceforge.net/project/junit/junit/4.10/junit-4.10.jar || die "Error wgetting junit"
+        else
+            curl -o "${BASE_DIR?}/opt/share/java/junit.jar" -O#L "https://github.com/downloads/junit-team/junit/junit-4.11.jar" || die "Error downloading junit"
+        fi
+        echo "junit Installed" 1>&2
+    fi
+}
+
+determine_os_flavor()
 {
     OS_FLAVOR="Unknown"
 }
