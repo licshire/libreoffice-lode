@@ -3,7 +3,7 @@
 
 install_pre_build_native_make()
 {
-    local make_exe_file="make-85047eb-msvs.exe"
+    local make_exe_file="make-85047eb-msvc.exe"
 
     if [ ! -f "${BASE_DIR?}/packages/${make_exe_file?}" -o ! -x "${BASE_DIR?}/opt/bin/make" ] ; then
         pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
