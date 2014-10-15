@@ -21,13 +21,14 @@ source "$BASE_DIR/bin/utils.sh"
 do_help()
 {
 cat <<EOF
-setup [ --help ] [ -v ] [ --prereq ] [ --jenkins ]
+setup [ --help ] [ -v ] [ --prereq ] [ --jenkins ] [ --dev ]
 
 setup the necessary environment to build.
 run --prereq first to determine if your os version is currently supported by the tool
 it will also tell you the list of thing, if any that need to be done prior to running the setup
 
 --jenkins prepare what is needed for a jenkins slave operation
+--dev setup a dev build environment in dev/core
 
 EOF
 }
@@ -40,6 +41,7 @@ EOF
 V=0
 DO_PREREQ=0
 DO_JENKINS=0
+DO_DEV=0
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -52,6 +54,9 @@ while [ "${1}" != "" ]; do
     fi
 
     case "${parm}" in
+        --dev)
+            DO_DEV=1
+            ;;
         -h|--help)  # display help
             do_help
             exit
@@ -90,6 +95,10 @@ install_build_dep
 
 if [ "$DO_JENKINS" = "1" ] ; then
     setup_jenkins_slave
+fi
+
+if [ "$DO_DEV" = "1" ] ; then
+    setup_dev
 fi
 
 final_notes

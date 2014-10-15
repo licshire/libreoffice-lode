@@ -102,6 +102,41 @@ test_git_or_bare_mirror()
     fi
 }
 
+test_git_or_mirror_clone()
+{
+    # test if a git repo exist, if not clone it, using a reference mirror if available
+    # you need to have the current working dir be where you want to clone
+    local g="$1"
+    local remote="$2"
+
+    if [ -n "${g}" -a -n "${remote}" ] ; then
+        if [ -d "${g?}" ] ; then
+            if [ -d "${g?}/.git" ] ; then
+                echo "git repo '$(pwd)/${g?}' exist" 1>&2
+            else
+                echo "Error $(pwd)/${g?} is a directory but not a git repo" 1>&2
+                exit 1
+            fi
+        elif [ -e "${g}" ] ; then
+            echo "Error $(pwd)/${g?} is a directory but not a git repo" 1>&2
+            exit 1
+        else
+            if [ -d "${BASE_DIR?}/mirrors/${g?}.git" ] ; then
+                git clone --reference "${BASE_DIR?}/mirrors/${g?}.git" "${remote?}" "${g?}"
+            else
+                git clone "${remote?}" "${g?}"
+            fi
+            if [ $? = "0" ] ; then
+                echo "Cloned $(pwd)/${g?}" 1>&2
+            else
+                echo "Error Cloning $(pwd)/${g?}" 1>&2
+                rm -fr "${g}"
+                exit 1
+            fi
+        fi
+    fi
+}
+
 install_generic_conf_make_install()
 {
     local module="$1"
@@ -197,12 +232,66 @@ setup_adm_repos()
     popd > /dev/null
 }
 
-setup_jenkins_slave()
+setup_mirrors()
 {
     pushd "${BASE_DIR?}" > /dev/null
-    test_create_dirs jenkins mirrors
-    pushd mirrors > /dev/null || die "Error switch to mirrors"
+    test_create_dirs mirrors
+    pushd mirrors > /dev/null || die "Error switching to mirrors"
     test_git_or_bare_mirror core git://gerrit.libreoffice.org/core
+    popd > /dev/null
+    popd > /dev/null
+}
+setup_jenkins_slave()
+{
+    setup_mirrors
+    test_create_dirs jenkins
+}
+
+write_ssh_config()
+{
+            cat >> ~/.ssh/config <<EOF
+
+Host lode
+Hostname gerrit.libreoffice.org
+Port 29418
+
+EOF
+
+}
+
+setup_ssh_config()
+{
+    local conf_host=""
+
+    if [ -f ~/.ssh/config ] ; then
+        conf_host=$(grep '^Host lode$' ~/.ssh/config)
+        if [ "${conf_host?}" = "Host lode" ] ; then
+            echo "Host lode already present in ~/.ssh/config" 1>&2
+        else
+            write_ssh_config
+        fi
+    else
+        write_ssh_config
+    fi
+}
+
+setup_dev()
+{
+    setup_mirrors
+    setup_ssh_config
+    test_create_dirs dev
+    pushd dev > /dev/null || die "Error switching to dev"
+    test_git_or_mirror_clone core git://gerrit.libreoffice.org/core
+    pushd core > /dev/null || die "Error swithing to dev/core"
+    git config remote.origin.pushurl ssh://lode/core || die "Error setup the pushurl for core"
+    if [ ! -f autogen.input ] ; then
+        if [ -f "${BASE_DIR?}/autogen.input.base" ] ; then
+            cat "${BASE_DIR?}/autogen.input.base" > autogen.input || die "Error populating autogen.input from autogen.input.base"
+        fi
+        echo "--enable-debug" >> autogen.input || die "Error adding --enable-debug to autogen.input"
+    fi
+    popd > /dev/null || die "Error popping core"
+    popd > /dev/null || die "Error poping dev"
 }
 
 install_build_dep()
@@ -230,6 +319,8 @@ final_notes()
     os_flavor_notes
     cat <<EOF
 
+    add in your profile.
+    export LODE_HOME=$(pwd)
 Done.
 
 EOF
