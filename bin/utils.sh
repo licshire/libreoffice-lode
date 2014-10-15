@@ -201,6 +201,9 @@ determine_os()
     Linux)
         OS="Linux"
         ;;
+    CYGWIN*)
+        OS="Cygwin"
+        ;;
     *)
         die "Error:Unsupported base_os:${base_os}"
         ;;
