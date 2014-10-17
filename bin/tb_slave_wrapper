@@ -40,6 +40,8 @@ export TEMP="$(pwd)/tempdir"
 R=0
 if [ ! -f autogen.input ] ; then
   cp ${LODE_HOME?}/autogen.input.base autogen.input
+elif [ ${LODE_HOME?}/autogen.input.base -nt autogen.input ]
+  cp ${LODE_HOME?}/autogen.input.base autogen.input
 fi
 
 if [ ! -f Makefile ] ; then
