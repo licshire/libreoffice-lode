@@ -1,0 +1,88 @@
+#!/bin/bash
+
+os=$(uname)
+
+while [ "${1}" != "" ]; do
+    parm=${1%%=*}
+    arg=${1#*=}
+    has_arg=
+    if [ "${1}" != "${parm?}" ] ; then
+        has_arg=1
+    else
+        arg=""
+    fi
+
+    case "${parm}" in
+	--branch|-b)
+	    tb_branch="$arg"
+	    ;;
+	--os)
+	    os="$arg"
+	    ;;
+        -*)
+            die "Invalid option $1"
+            ;;
+        *)
+            die "Invalid argument $1"
+            ;;
+    esac
+    shift
+done
+
+rm -fr tempdir
+mkdir tempdir
+rm -f build.log.tmp
+
+export TMPDIR="$(pwd)/tempdir"
+export TMP="$(pwd)/tempdir"
+export TEMP="$(pwd)/tempdir"
+
+R=0
+if [ ! -f autogen.input ] ; then
+  cp ${LODE_HOME?}/autogen.input.base autogen.input
+fi
+
+if [ ! -f Makefile ] ; then
+    ./autogen.sh 2>&1 | tee -a build.log.tmp
+    R=${PIPESTATUS[0]
+
+    if [ "$R" = "0" ] ; then
+	touch config_host.mk
+    fi
+fi
+if [ "$R" = "0" -a -f .clean_slave ] ; then
+    make clean | tee -a build.log.tmp
+    rm .clean_slave
+fi
+
+if [ "$R" = "0" ] ; then
+    make | tee -a build.log.tmp
+    R=${PIPESTATUS[0]
+fi
+
+if [ "$R" = "0" ] ; then
+    S="success"
+else
+    S="build_failed"
+fi
+
+cat <<EOF > build.log
+
+tinderbox: administrator: jenkins
+tinderbox: buildname: Jenkins_${os}
+tinderbox: tree: ${tb_branch}
+tinderbox: starttime: `date -u '+%s'`
+tinderbox: timenow: `date -u '+%s'`
+tinderbox: errorparser: unix
+tinderbox: status: $S
+tinderbox: END
+"
+
+TinderboxPrint: <a title="jenkins build" href="${BUILD_URL}">jenkins on $NODE_NAME</a>
+
+EOF
+
+cat build.log.tmp >> build.log
+rm build.log.tmp
+
+exit $R
