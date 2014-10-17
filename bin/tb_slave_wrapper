@@ -46,7 +46,7 @@ fi
 
 if [ ! -f Makefile ] ; then
     ./autogen.sh 2>&1 | tee -a build.log.tmp
-    R=${PIPESTATUS[0]
+    R=${PIPESTATUS[0]}
 
     if [ "$R" = "0" ] ; then
 	touch config_host.mk
@@ -59,7 +59,7 @@ fi
 
 if [ "$R" = "0" ] ; then
     make | tee -a build.log.tmp
-    R=${PIPESTATUS[0]
+    R=${PIPESTATUS[0]}
 fi
 
 if [ "$R" = "0" ] ; then
