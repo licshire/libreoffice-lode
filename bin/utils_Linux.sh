@@ -4,7 +4,7 @@ install_default_autogen_input()
 {
     cat > "${BASE_DIR?}/autogen.input.base" <<EOF
 --with-external-tar=${BASE_DIR?}/ext_tar
---with-ant=${BASE_DIR?}/opt/ant
+--with-ant-home=${BASE_DIR?}/opt/ant
 EOF
 }
 
