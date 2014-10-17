@@ -78,7 +78,6 @@ tinderbox: timenow: `date -u '+%s'`
 tinderbox: errorparser: unix
 tinderbox: status: $S
 tinderbox: END
-"
 
 TinderboxPrint: <a title="jenkins build" href="${BUILD_URL}">jenkins on $NODE_NAME</a>
 
