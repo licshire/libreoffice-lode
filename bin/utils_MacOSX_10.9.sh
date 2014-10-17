@@ -5,6 +5,7 @@ install_default_autogen_input()
 {
     cat > "${BASE_DIR?}/autogen.input.base" <<EOF
 --with-junit=${BASE_DIR?}/opt/share/java/junit.jar
+--with-ant=${BASE_DIR?}/opt/ant
 --with-external-tar=${BASE_DIR?}/ext_tar
 EOF
 }

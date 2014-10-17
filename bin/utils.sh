@@ -188,7 +188,8 @@ install_ant()
         rm -f "${BASE_DIR?}/packages/${ant_version?}-bin.zip"
         get_remote_file "http://archive.apache.org/dist/ant/binaries/${ant_version?}-bin.zip"
         unzip ${ant_version?}-bin.zip || die "Error unziping ant"
-        ln -s "${BASE_DIR?}/packages/${ant_version?}/bin/ant" "${BASE_DIR}/opt/bin/ant" || die "Error soft-linking ant"
+        rm -fr "${BASE_DIR?}/opt/ant"
+        cp -r "${BASE_DIR?}/packages/${ant_version?}" "${BASE_DIR?}/opt/ant" || die "Delivering and to ${BASE_DIR?}/opt"
         echo "ant Installed" 1>&2
     else
         echo "ant already installed" 1>&2
