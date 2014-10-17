@@ -182,7 +182,10 @@ install_ant()
 {
     local ant_version=apache-ant-1.9.4
 
-    if [ ! -x "${BASE_DIR?}/opt/bin/ant" ] ; then
+    if [ ! -x "${BASE_DIR?}/opt/ant/bin/ant" ] ; then
+        if [ -L "${BASE_DIR?}/opt/bin/ant" ] ; then
+            unlink "${BASE_DIR?}/opt/bin/ant"
+        fi
         pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
         rm -fr "${BASE_DIR?}/packages/${ant_version?}"
         rm -f "${BASE_DIR?}/packages/${ant_version?}-bin.zip"
