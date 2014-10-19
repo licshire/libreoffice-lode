@@ -193,6 +193,7 @@ install_ant()
         unzip ${ant_version?}-bin.zip || die "Error unziping ant"
         rm -fr "${BASE_DIR?}/opt/ant"
         cp -r "${BASE_DIR?}/packages/${ant_version?}" "${BASE_DIR?}/opt/ant" || die "Delivering and to ${BASE_DIR?}/opt"
+        popd > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
         echo "ant Installed" 1>&2
     else
         echo "ant already installed" 1>&2
