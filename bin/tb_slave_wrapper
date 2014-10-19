@@ -79,7 +79,7 @@ tinderbox: errorparser: unix
 tinderbox: status: $S
 tinderbox: END
 
-TinderboxPrint: <a title="jenkins build" href="${BUILD_URL}">jenkins on $NODE_NAME</a>
+TinderboxPrint: <a title="jenkins build" href="http://ci.libreoffice.org/job/${JOB_NAME}/${BUILD_NUMBER}/">jenkins on $NODE_NAME</a>
 
 EOF
 
