@@ -1,6 +1,7 @@
 #!/bin/bash
 
 os=$(uname)
+start_time=
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -19,6 +20,8 @@ while [ "${1}" != "" ]; do
 	--os)
 	    os="$arg"
 	    ;;
+	--real)
+	    start_time=`date -u '+%s'`
         -*)
             die "Invalid option $1"
             ;;
@@ -68,12 +71,16 @@ else
     S="build_failed"
 fi
 
+if [ -z "${start_time}" ;  then
+    start_time=`date -u '+%s'`
+fi
+
 cat <<EOF > build.log
 
 tinderbox: administrator: jenkins
 tinderbox: buildname: Jenkins_${os}
 tinderbox: tree: ${tb_branch}
-tinderbox: starttime: `date -u '+%s'`
+tinderbox: starttime: ${start_time?}
 tinderbox: timenow: `date -u '+%s'`
 tinderbox: errorparser: unix
 tinderbox: status: $S
