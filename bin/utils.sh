@@ -304,14 +304,15 @@ setup_jenkins_slave()
 
 write_ssh_config()
 {
-            cat >> ~/.ssh/config <<EOF
+    if [ -d ~/.ssh ] ; then
+        cat >> ~/.ssh/config <<EOF
 
 Host lode
 Hostname gerrit.libreoffice.org
 Port 29418
 
 EOF
-
+    fi
 }
 
 setup_ssh_config()
