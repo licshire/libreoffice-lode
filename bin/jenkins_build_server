@@ -1,0 +1,85 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+use IO::Socket;
+use threads;
+use threads::shared;
+use Cwd 'abs_path';
+
+if ( "$ENV{LODE_HOME}" eq "")
+{
+    die "LODE_HOME not set";
+}
+
+my $server = new IO::Socket::INET (
+    LocalHost => 'localhost',
+    LocalPort => '2628',
+    Proto => 'tcp',
+    Listen => 1,
+    Reuse => 1,
+    );
+die "Could not create socket: $!\n" unless $server;
+
+for(;;)
+{
+    my $client;
+    do
+    {
+        $client = $server->accept;
+    }
+    until ( defined($client) );
+    my $thr = threads->new( \&processit, $client)->detach();
+}
+
+sub processit
+{
+    my ($lclient) = @_; #local client
+    if($lclient->connected)
+    {
+	my $wd = <$lclient>;
+	my $cmd = <$lclient>;
+
+	if( defined($wd) && defined($cmd))
+	{
+	    chomp $wd;
+	    ($wd) = split(' ', $wd);
+	    $wd = abs_path($wd);
+	    if ($wd =~ /^$ENV{LODE_HOME}/ )
+	    {
+		print $lclient "working dir is :". $wd. "\n";
+		if(chdir $wd)
+		{
+		    chomp $cmd;
+		    if( "$cmd" eq "make" )
+		    {
+			open(RESULT, $cmd. " && echo '#######SUCCESS#######' |");
+			while ( <RESULT> )
+			{
+			    print $lclient "$_";
+			}
+			close RESULT;
+		    }
+		    elsif( "$cmd" eq "test")
+		    {
+			print $lclient "Test OK\n";
+			print $lclient '#######SUCCESS#######'."\n";
+		    }
+		    else
+		    {
+			print $lclient "bad command :". $cmd . "\n";
+		    }
+		}
+		else
+		{
+		    print $lclient "can't chdir to : ".$wd."\n";
+		}
+	    }
+	    else
+	    {
+		print $lclient "bad working dir : ".$wd."\n";
+	    }
+	}
+    }
+    close( $lclient);
+}
