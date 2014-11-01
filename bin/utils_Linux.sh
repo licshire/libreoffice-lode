@@ -1,4 +1,8 @@
 # -*- tab-width : 4; indent-tabs-mode : nil -*-
+#
+#    Copyright (C) 2014 Norbert Thiebaud
+#    License: GPLv3
+#
 
 install_default_autogen_input()
 {

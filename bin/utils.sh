@@ -1,5 +1,10 @@
 # -*- tab-width : 4; indent-tabs-mode : nil -*-
 #
+#    Copyright (C) 2014 Norbert Thiebaud
+#    License: GPLv3
+#
+
+#
 # Display an error message and exit
 #
 die()
@@ -8,6 +13,9 @@ die()
     exit 1;
 }
 
+#
+# Test if a directory exist, if not create it
+#
 test_create_dir()
 {
     local d="$1"
@@ -33,7 +41,10 @@ test_create_dir()
     fi
 }
 
-
+#
+# Test if a list of directories exist
+# create the ones that do not
+#
 test_create_dirs()
 {
     local d=
@@ -44,6 +55,9 @@ test_create_dirs()
 }
 
 
+#
+# fetch a file via http
+#
 get_remote_file()
 {
     local url="$1"
@@ -56,6 +70,9 @@ get_remote_file()
     fi
 }
 
+#
+# test if a git repo exist, if not clone it
+#
 test_git_or_clone()
 {
     # test if a git repo exist, if not clone it
@@ -87,6 +104,10 @@ test_git_or_clone()
     fi
 }
 
+#
+# test if a bare git repo mirror exist
+# if not clone it
+#
 test_git_or_bare_mirror()
 {
     # test if a git repo exist, if not clone it
@@ -115,6 +136,10 @@ test_git_or_bare_mirror()
     fi
 }
 
+#
+# test if a git repo exist
+#  if not clone it using --reference to a local mirror
+#
 test_git_or_mirror_clone()
 {
     # test if a git repo exist, if not clone it, using a reference mirror if available
@@ -150,6 +175,10 @@ test_git_or_mirror_clone()
     fi
 }
 
+#
+# test if a module is installed
+# if not do the standard configure/make/make install dance
+#
 install_generic_conf_make_install()
 {
     local module="$1"
