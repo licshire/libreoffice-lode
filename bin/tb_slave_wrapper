@@ -1,7 +1,15 @@
 #!/bin/bash
 
+die()
+{
+    echo  "$@"
+    exit 1;
+}
+
 os=$(uname)
 start_time=
+clean=
+mode=tb
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -23,6 +31,12 @@ while [ "${1}" != "" ]; do
 	--real)
 	    start_time=`date -u '+%s'`
 	    ;;
+	--clean)
+	    clean=1
+	    ;;
+	--mode)
+	    mode="$arg"
+	    ;;
         -*)
             die "Invalid option $1"
             ;;
@@ -33,23 +47,42 @@ while [ "${1}" != "" ]; do
     shift
 done
 
-rm -fr tempdir
-mkdir tempdir
-rm -f build.log.tmp
+case "$(uname)" in
+    Darwin)
+        OS="MacOSX"
+        ;;
+    Linux)
+        OS="Linux"
+        ;;
+    CYGWIN*)
+        OS="Cygwin"
+        ;;
+esac
 
-export TMPDIR="$(pwd)/tempdir"
-export TMP="$(pwd)/tempdir"
-export TEMP="$(pwd)/tempdir"
+echo "OS:${OS}"
+
+if [ "${mode}" = "tb" ] ; then
+    build_log="build.log.tmp"
+else
+    build_log="build.log"
+fi
+
+#rm -fr tempdir
+#mkdir tempdir
+rm -f build.log.tmp
+rm -f build.log
 
 R=0
-if [ ! -f autogen.input ] ; then
-  cp ${LODE_HOME?}/autogen.input.base autogen.input
-elif [ ${LODE_HOME?}/autogen.input.base -nt autogen.input ] ; then
-  cp ${LODE_HOME?}/autogen.input.base autogen.input
+if [ -f ${LODE_HOME?}/autogen.input.base ] ; then
+    if [ ! -f autogen.input ] ; then
+	cp ${LODE_HOME?}/autogen.input.base autogen.input
+    elif [ ${LODE_HOME?}/autogen.input.base -nt autogen.input ] ; then
+	cp ${LODE_HOME?}/autogen.input.base autogen.input
+    fi
 fi
 
 if [ ! -f Makefile ] ; then
-    ./autogen.sh 2>&1 | tee -a build.log.tmp
+    ./autogen.sh 2>&1 | tee -a ${build_log}
     R=${PIPESTATUS[0]}
 
     if [ "$R" = "0" ] ; then
@@ -57,13 +90,31 @@ if [ ! -f Makefile ] ; then
     fi
 fi
 if [ "$R" = "0" -a -f .clean_slave ] ; then
-    make clean | tee -a build.log.tmp
+    make clean | tee -a ${build_log}
     rm .clean_slave
+elif [ "$R" = "0" -a "$clean" = "1" ] ; then
+    make clean | tee -a ${build_log}
 fi
 
+#if [ ${OS} = "Cygwin" ] ; then
+#    export TMPDIR="$(cygpath -d $(pwd)/tempdir)"
+#    export TMP="$(cygpath -d $(pwd)/tempdir)"
+#    export TEMP="$(cygpath -d $(pwd)/tempdir)"
+#else
+#    export TMPDIR="cygpath -d $(pwd)/tempdir"
+#    export TMP="$(pwd)/tempdir"
+#    export TEMP="$(pwd)/tempdir"
+#fi
+
 if [ "$R" = "0" ] ; then
-    make | tee -a build.log.tmp
-    R=${PIPESTATUS[0]}
+    if [ "${OS}" = "Cygwin" ] ; then
+	echo "ssh loopback"
+	ssh -p 2628 127.0.0.1 "cd $(pwd) && make" | tee -a ${build_log}
+	R=${PIPESTATUS[0]}
+    else
+	make | tee -a ${build_log}
+	R=${PIPESTATUS[0]}
+    fi
 fi
 
 if [ "$R" = "0" ] ; then
@@ -72,11 +123,12 @@ else
     S="build_failed"
 fi
 
-if [ -z "${start_time}" ;  then
+if [ -z "${start_time}" ] ;  then
     start_time=`date -u '+%s'`
 fi
 
-cat <<EOF > build.log
+if [ "${mode}" == "$tb" ] ; then
+    cat <<EOF > build.log
 
 tinderbox: administrator: jenkins
 tinderbox: buildname: Jenkins_${os}
@@ -91,7 +143,8 @@ TinderboxPrint: <a title="jenkins build" href="http://ci.libreoffice.org/job/${J
 
 EOF
 
-cat build.log.tmp >> build.log
-rm build.log.tmp
+    cat ${build_log} >> build.log
+    rm ${build_log}
+fi
 
 exit $R
