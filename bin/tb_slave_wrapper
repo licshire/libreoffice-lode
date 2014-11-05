@@ -90,29 +90,30 @@ if [ ! -f Makefile ] ; then
     fi
 fi
 if [ "$R" = "0" -a -f .clean_slave ] ; then
-    make clean | tee -a ${build_log}
+    make clean 2>&1 | tee -a ${build_log}
     rm .clean_slave
 elif [ "$R" = "0" -a "$clean" = "1" ] ; then
-    make clean | tee -a ${build_log}
+    make clean 2>&1 | tee -a ${build_log}
 fi
 
-#if [ ${OS} = "Cygwin" ] ; then
+if [ ${OS} = "Cygwin" ] ; then
+    :
 #    export TMPDIR="$(cygpath -d $(pwd)/tempdir)"
 #    export TMP="$(cygpath -d $(pwd)/tempdir)"
 #    export TEMP="$(cygpath -d $(pwd)/tempdir)"
-#else
-#    export TMPDIR="cygpath -d $(pwd)/tempdir"
-#    export TMP="$(pwd)/tempdir"
-#    export TEMP="$(pwd)/tempdir"
-#fi
+else
+    export TMPDIR="cygpath -d $(pwd)/tempdir"
+    export TMP="$(pwd)/tempdir"
+    export TEMP="$(pwd)/tempdir"
+fi
 
 if [ "$R" = "0" ] ; then
     if [ "${OS}" = "Cygwin" ] ; then
-	echo "ssh loopback"
-	ssh -p 2628 127.0.0.1 "cd $(pwd) && make" | tee -a ${build_log}
+	echo "jenkins_build_client"
+	${LODE_HOME}/bin/jenkins_build_client make 2>&1 | tee -a ${build_log}
 	R=${PIPESTATUS[0]}
     else
-	make | tee -a ${build_log}
+	make 2>&1 | tee -a ${build_log}
 	R=${PIPESTATUS[0]}
     fi
 fi
