@@ -6,11 +6,13 @@ use IO::Socket;
 use threads;
 use threads::shared;
 use Cwd 'abs_path';
+use POSIX ;
 
 if ( "$ENV{LODE_HOME}" eq "")
 {
     die "LODE_HOME not set";
 }
+$SIG{PIPE} = 'IGNORE';#sub { die "sigpipe"; };
 
 my $server = new IO::Socket::INET (
     LocalHost => 'localhost',
@@ -21,15 +23,16 @@ my $server = new IO::Socket::INET (
     );
 die "Could not create socket: $!\n" unless $server;
 
+my $client;
+
 for(;;)
 {
-    my $client;
     do
     {
         $client = $server->accept;
     }
     until ( defined($client) );
-    my $thr = threads->new( \&processit, $client)->detach();
+    processit($client);
 }
 
 sub processit
@@ -53,11 +56,25 @@ sub processit
 		    chomp $cmd;
 		    if( "$cmd" eq "make" )
 		    {
-			open(RESULT, $cmd. " && echo '#######SUCCESS#######' |");
-			while ( <RESULT> )
+			my $pid = open(RESULT, "-|");
+			if($pid)
 			{
-			    print $lclient "$_";
+			    print "forked pid $pid \n";
+			    while(<RESULT>)
+			    {
+				if( ! print $lclient "$_")
+				{
+				    print "client bailed\n";
+				    system("TASKKILL /F /T /PID $pid");
+				    last;
+				}
+			    }
 			}
+			else
+			{
+			    exec "make", "-f", "C:/cygwin/$ENV{LODE_HOME}/bin/cygwrapper.Makefile" || die "can't exec";
+			}
+			print "CLose RESULT"."\n";
 			close RESULT;
 		    }
 		    elsif( "$cmd" eq "test")
