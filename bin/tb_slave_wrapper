@@ -67,8 +67,8 @@ else
     build_log="build.log"
 fi
 
-#rm -fr tempdir
-#mkdir tempdir
+rm -fr tempdir
+mkdir tempdir
 rm -f build.log.tmp
 rm -f build.log
 
