@@ -60,6 +60,7 @@ case "$(uname)" in
 esac
 
 echo "OS:${OS}"
+echo "pwd:$(pwd)"
 
 if [ "${mode}" = "tb" ] ; then
     build_log="build.log.tmp"
@@ -96,16 +97,16 @@ elif [ "$R" = "0" -a "$clean" = "1" ] ; then
     make clean 2>&1 | tee -a ${build_log}
 fi
 
-if [ ${OS} = "Cygwin" ] ; then
-    :
+#if [ ${OS} = "Cygwin" ] ; then
+#    :
 #    export TMPDIR="$(cygpath -d $(pwd)/tempdir)"
 #    export TMP="$(cygpath -d $(pwd)/tempdir)"
 #    export TEMP="$(cygpath -d $(pwd)/tempdir)"
-else
-    export TMPDIR="cygpath -d $(pwd)/tempdir"
-    export TMP="$(pwd)/tempdir"
-    export TEMP="$(pwd)/tempdir"
-fi
+#else
+#    export TMPDIR="cygpath -d $(pwd)/tempdir"
+#    export TMP="$(pwd)/tempdir"
+#    export TEMP="$(pwd)/tempdir"
+#fi
 
 if [ "$R" = "0" ] ; then
     if [ "${OS}" = "Cygwin" ] ; then
