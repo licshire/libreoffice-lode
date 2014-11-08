@@ -129,7 +129,7 @@ if [ -z "${start_time}" ] ;  then
     start_time=`date -u '+%s'`
 fi
 
-if [ "${mode}" == "$tb" ] ; then
+if [ "${mode}" == "tb" ] ; then
     cat <<EOF > build.log
 
 tinderbox: administrator: jenkins
