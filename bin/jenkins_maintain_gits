@@ -1,0 +1,33 @@
+#!/bin/bash
+# -*- tab-width : 4; indent-tabs-mode : nil -*-
+#
+#    Copyright (C) 2014 Norbert Thiebaud
+#    License: GPLv3
+#
+
+do_repo()
+{
+    base="$1"
+    pushd "$base"
+    for repo in $(ls -1) ; do
+        if [ -d ${repo}/.git ] ; then
+            pushd ${repo}
+            if [ -f ${repo}/Repository,mk ] ; then
+                echo "${LODE_HOME}/mirrors/core.git/object" > .git/objects/info/alternate
+            fi
+	        git gc
+            popd
+	    elif [ -d ${repo} ] ; then
+            do_repo "$repo"
+        fi
+    done
+    popd
+}
+
+pushd ${LODE_HOME}/mirrors/core.git
+git remote update
+popd
+
+do_repo "${LODE_HOME}/jenkins/workspace"
+
+
