@@ -20,9 +20,31 @@ install_pre_build_native_make()
     fi
 }
 
+install_pre_build_nasm()
+{
+    local exe_file="nasm.exe"
+    local pack_file="nasm-2.11.06-win32.zip"
+    local pack_dir="nasm-2.11.06"
+    local http_file="http://www.nasm.us/pub/nasm/releasebuilds/2.11.06/win32/nasm-2.11.06-win32.zip"
+
+    if [ ! -f "${BASE_DIR?}/opt/bin/$exe_file}" ] ; then
+        test_create_dirs "${BASE_DIR?}/opt/bin"
+        pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
+        rm -fr "${pack_file?}"
+        rm -fr "${pack_dir?}"
+        wget "${http_file?}" || die "Error download ${module?} source package"
+        unzip "${pack_file?}" || die "error unzipping nasm"
+        cp "${pack_dir?}/${exe_file?}" "${BASE_DIR?}/opt/bin/${exe_file?}" || die "Error copying nasm.exe"
+        chmod a+x "${BASE_DIR?}/opt/bin/${exe_file?}" || die "Error chmoding installed nasm"
+        popd > /dev/null || die "Error poping ${BASE_DIR?}/packages"
+    fi
+
+}
+
 install_build_dep()
 {
     install_pre_build_native_make
     install_ant
     install_junit
+    install_pre_build_nasm
 }
