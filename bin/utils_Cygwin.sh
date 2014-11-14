@@ -27,7 +27,7 @@ install_pre_build_nasm()
     local pack_dir="nasm-2.11.06"
     local http_file="http://www.nasm.us/pub/nasm/releasebuilds/2.11.06/win32/nasm-2.11.06-win32.zip"
 
-    if [ ! -f "${BASE_DIR?}/opt/bin/$exe_file}" ] ; then
+    if [ ! -f "${BASE_DIR?}/opt/bin/${exe_file?}" ] ; then
         test_create_dirs "${BASE_DIR?}/opt/bin"
         pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
         rm -fr "${pack_file?}"
