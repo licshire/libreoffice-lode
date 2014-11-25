@@ -15,9 +15,12 @@ do_repo()
             if [ -f ${repo}/Repository,mk ] ; then
                 echo "${LODE_HOME}/mirrors/core.git/object" > .git/objects/info/alternate
             fi
-	        git gc
+            git gc
+            if [ -f Makefile ] ; then
+                make clean
+            fi
             popd
-	    elif [ -d ${repo} ] ; then
+        elif [ -d ${repo} ] ; then
             do_repo "$repo"
         fi
     done
