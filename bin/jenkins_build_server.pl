@@ -17,7 +17,10 @@ if ( "$ENV{LODE_HOME}" eq "")
     die "LODE_HOME not set";
 }
 $SIG{PIPE} = 'IGNORE';
-$SIG{ALRM} = sub { die "timeout\n"; };
+$SIG{ALRM} = sub { system("TASKKILL /F /T /PID $pid");
+                   print $client "\n######TIMED-OUT######\n";
+                   die "timeout\n";
+};
 
 my $server = new IO::Socket::INET (
     LocalHost => 'localhost',
@@ -32,6 +35,7 @@ for(;;)
 {
     do
     {
+        print "accepting\n";
         $client = $server->accept;
     }
     until ( defined($client) );
@@ -45,7 +49,7 @@ sub processit
     {
         my $wd = <$lclient>;
         my $cmd = <$lclient>;
-
+        print "prcoess it\n";
         if( defined($wd) && defined($cmd))
         {
             chomp $wd;
