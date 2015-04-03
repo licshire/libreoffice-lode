@@ -18,7 +18,7 @@ install_build_dep()
     install_ant
     install_junit
     install_generic_conf_make_install "doxygen" "1.8.8" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.8.src.tar.gz"
-    install_generic_conf_make_install "ccache" "3.1.9" "http://www.samba.org/ftp/ccache" "ccache-3.1.9.tar.gz"
+    install_generic_conf_make_install "ccache" "3.1.9" "https://www.samba.org/ftp/ccache" "ccache-3.1.9.tar.gz"
     install_default_autogen_input
 }
 
