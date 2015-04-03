@@ -95,6 +95,9 @@ test_git_or_clone()
             git clone "${remote}" "${g}"
             if [ $? = "0" ] ; then
                 echo "Cloned $(pwd)/${g}" 1>&2
+                pushd $(pwd)/${g} > /dev/null
+                git config --add remote.origin.fetch "+refs/notes/*:refs/notes/*"
+                popd > /dev/null
             else
                 echo "Error Cloning $(pwd)/${g}" 1>&2
                 rm -fr "${g}"
@@ -166,6 +169,9 @@ test_git_or_mirror_clone()
             fi
             if [ $? = "0" ] ; then
                 echo "Cloned $(pwd)/${g?}" 1>&2
+                pushd $(pwd)/${g} > /dev/null
+                git config --add remote.origin.fetch "+refs/notes/*:refs/notes/*"
+                popd > /dev/null
             else
                 echo "Error Cloning $(pwd)/${g?}" 1>&2
                 rm -fr "${g}"
