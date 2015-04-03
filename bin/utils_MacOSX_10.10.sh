@@ -24,11 +24,13 @@ install_build_dep()
 
 os_flavor_notes()
 {
-cat <<EOF
+if [ -z "$(echo "$PATH" | grep "${BASE_DIR}/opt/bin")" ] ; then
+    cat <<EOF
 =============
 
     Add ${BASE_DIR}/opt/bin in front of your PATH before configuring
     or building libreoffice
 
 EOF
+fi
 }

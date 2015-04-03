@@ -408,11 +408,14 @@ final_notes()
 {
     os_notes
     os_flavor_notes
+
+if [ -z "${LODE_HOME}" ] ; then
     cat <<EOF
 
     add in your profile.
     export LODE_HOME=$(pwd)
-Done.
-
 EOF
+fi
+echo ""
+echo "   Done."
 }
