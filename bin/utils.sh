@@ -149,32 +149,33 @@ test_git_or_mirror_clone()
     # you need to have the current working dir be where you want to clone
     local g="$1"
     local remote="$2"
+    local r="$3"
 
-    if [ -n "${g}" -a -n "${remote}" ] ; then
-        if [ -d "${g?}" ] ; then
-            if [ -d "${g?}/.git" ] ; then
-                echo "git repo '$(pwd)/${g?}' exist" 1>&2
+    if [ -n "${r}" -a -n "${remote}" ] ; then
+        if [ -d "${r?}" ] ; then
+            if [ -d "${r?}/.git" ] ; then
+                echo "git repo '$(pwd)/${r?}' exist" 1>&2
             else
-                echo "Error $(pwd)/${g?} is a directory but not a git repo" 1>&2
+                echo "Error $(pwd)/${r?} is a directory but not a git repo" 1>&2
                 exit 1
             fi
-        elif [ -e "${g}" ] ; then
-            echo "Error $(pwd)/${g?} is a directory but not a git repo" 1>&2
+        elif [ -e "${r}" ] ; then
+            echo "Error $(pwd)/${r?} is a directory but not a git repo" 1>&2
             exit 1
         else
             if [ -d "${BASE_DIR?}/mirrors/${g?}.git" ] ; then
-                git clone --reference "${BASE_DIR?}/mirrors/${g?}.git" "${remote?}" "${g?}"
+                git clone --reference "${BASE_DIR?}/mirrors/${g?}.git" "${remote?}" "${r?}"
             else
-                git clone "${remote?}" "${g?}"
+                git clone "${remote?}" "${r?}"
             fi
             if [ $? = "0" ] ; then
-                echo "Cloned $(pwd)/${g?}" 1>&2
-                pushd $(pwd)/${g} > /dev/null
+                echo "Cloned $(pwd)/${r?}" 1>&2
+                pushd $(pwd)/${r} > /dev/null
                 git config --add remote.origin.fetch "+refs/notes/*:refs/notes/*"
                 popd > /dev/null
             else
-                echo "Error Cloning $(pwd)/${g?}" 1>&2
-                rm -fr "${g}"
+                echo "Error Cloning $(pwd)/${r?}" 1>&2
+                rm -fr "${r}"
                 exit 1
             fi
         fi
@@ -366,13 +367,54 @@ setup_ssh_config()
     fi
 }
 
+gc_repos()
+{
+    base="$1"
+    pushd "$base" || die "Error switching to $base"
+    for repo in $(ls -1) ; do
+        if [ -d ${repo}/.git ] ; then
+            pushd ${repo}
+            if [ -f ${repo}/Repository.mk ] ; then
+                echo "${BASE_DIR?}/mirrors/core.git/object" > .git/objects/info/alternate
+            fi
+            git gc
+            popd > /dev/null
+        fi
+    done
+    popd > /dev/null
+}
+
+refresh_repos()
+{
+    pushd "${BASE_DIR?}/mirrors/core.git" > /dev/null || die "Error switching to mirror"
+    git remote update
+    popd > /dev/null
+    gc_repos "${BASE_DIR?}/dev"
+}
+
+create_new_work_clone()
+{
+repo="$1"
+
+    if [ -e dev/${repo} ] ; then
+        die "dev/${repo} already exist"
+    else
+        pushd dev > /dev/null || die "Error switching to dev"
+        test_git_or_mirror_clone "core" git://gerrit.libreoffice.org/core "${repo}"
+        pushd "${repo}" > /dev/null || die "Error swithing to dev/${repo}"
+        git config remote.origin.pushurl ssh://lode/core || die "Error setup the pushurl for ${repo}"
+    fi
+    popd > /dev/null || die "Error popping ${core}"
+    popd > /dev/null || die "Error poping dev"
+}
+
 setup_dev()
 {
     setup_mirrors
     setup_ssh_config
     test_create_dirs dev
     pushd dev > /dev/null || die "Error switching to dev"
-    test_git_or_mirror_clone core git://gerrit.libreoffice.org/core
+    test_git_or_mirror_clone core git://gerrit.libreoffice.org/core core
     pushd core > /dev/null || die "Error swithing to dev/core"
     git config remote.origin.pushurl ssh://lode/core || die "Error setup the pushurl for core"
     if [ ! -f autogen.input ] ; then

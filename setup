@@ -21,7 +21,7 @@ source "$BASE_DIR/bin/utils.sh"
 do_help()
 {
 cat <<EOF
-setup [ --help ] [ -v ] [ --prereq ] [ --jenkins ] [ --dev ]
+setup [ --help ] [ -v ] [ --prereq ] [ --jenkins ] [ --dev ] [ --new <name> ] [ --refresh ]
 
 setup the necessary environment to build.
 run --prereq first to determine if your os version is currently supported by the tool
@@ -29,6 +29,8 @@ it will also tell you the list of thing, if any that need to be done prior to ru
 
 --jenkins prepare what is needed for a jenkins slave operation
 --dev setup a dev build environment in dev/core
+--new <name> create a clone of core in dev/<name>
+--refresh update the mirror repo and git gc the repos under dev
 
 EOF
 }
@@ -42,6 +44,8 @@ V=0
 DO_PREREQ=0
 DO_JENKINS=0
 DO_DEV=0
+DO_NEW=0
+DO_REFRESH=0
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -56,6 +60,12 @@ while [ "${1}" != "" ]; do
     case "${parm}" in
         --dev)
             DO_DEV=1
+            ;;
+        -n|--new)
+            DO_NEW=1
+            ;;
+        --refresh)
+            DO_REFRESH=1
             ;;
         -h|--help)  # display help
             do_help
@@ -74,7 +84,11 @@ while [ "${1}" != "" ]; do
             die "Invalid option $1"
             ;;
         *)
-            die "Invalid argument $1"
+            if [ "$DO_NEW" = 1 ] ; then
+                REPO="$1"
+            else
+                die "Invalid argument $1"
+            fi
             ;;
     esac
     shift
@@ -85,6 +99,16 @@ determine_os  # this will overload the usefull bits based on the machine we run 
 if [ "$DO_PREREQ" = "1" ] ; then
     display_prereq
     exit 0;
+fi
+
+if [ "$DO_NEW" = 1 ] ; then
+    create_new_work_clone "$REPO"
+    exit 0;
+fi
+
+if [ "$DO_REFRESH" = 1 ] ; then
+    refresh_repos
+    exit 0
 fi
 
 setup_base_tree
