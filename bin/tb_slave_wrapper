@@ -11,10 +11,55 @@ die()
     exit 1;
 }
 
+adjust_config()
+{
+    pos="$1"
+    neg="$2"
+
+    if [ ! -f autogen.input.job ] ; then
+	if [ -f autogen.input.base ] ; then
+	    cp autogen.input.base autogen.input.job
+	else
+	    touch autogen.input.job
+	fi
+    fi
+    grep -v "${neg}" autogen.input.job 2> /dev/null > autogen.input.temp
+    echo "${pos}" > autogen.input.temp
+    mv autogen.input.temp autogen.input.job
+}
+
+process_config()
+{
+    opt="$1"
+
+    case "$opt" in
+	--enable-debug)
+	    adjust_config "--enable-debug" "--disable-debug"
+	    ;;
+	--disable-debug)
+	    adjust_config "--disable-debug" "--enable-debug"
+	    ;;
+    esac
+}
+
+final_config()
+{
+    if [ -f autogen.input.job ] ; then
+	cat autogen.input.job | sort -u > autogen.input.temp
+	diff -u autogen.input autogen.input.temp > /dev/null 2> /dev/null
+	if [ "$?" != "0" ] ; then
+	    mv autogen.input.temp autogen.input
+	else
+	    rm autogen.input.job
+	fi
+    fi
+}
+
 os=$(uname)
 start_time=
 clean=
 mode=tb
+name=
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -39,8 +84,14 @@ while [ "${1}" != "" ]; do
 	--clean)
 	    clean=1
 	    ;;
+	--name)
+            name="$arg"
+	    ;;
 	--mode)
 	    mode="$arg"
+	    ;;
+	--config)
+	    process_config "$arg"
 	    ;;
         -*)
             die "Invalid option $1"
@@ -67,6 +118,8 @@ esac
 echo "OS:${OS}"
 echo "pwd:$(pwd)"
 
+final_config
+
 if [ "${mode}" = "tb" ] ; then
     build_log="build.log.tmp"
 else
@@ -80,10 +133,10 @@ rm -f build.log
 
 R=0
 if [ -f ${LODE_HOME?}/autogen.input.base ] ; then
-    if [ ! -f autogen.input ] ; then
-	cp ${LODE_HOME?}/autogen.input.base autogen.input
-    elif [ ${LODE_HOME?}/autogen.input.base -nt autogen.input ] ; then
-	cp ${LODE_HOME?}/autogen.input.base autogen.input
+    if [ ! -f autogen.input.base ] ; then
+	cp ${LODE_HOME?}/autogen.input.base autogen.input.base
+    elif [ ${LODE_HOME?}/autogen.input.base -nt autogen.input.base ] ; then
+	cp ${LODE_HOME?}/autogen.input.base autogen.input.base
     fi
 fi
 
@@ -115,12 +168,12 @@ fi
 
 if [ "$R" = "0" ] ; then
     if [ "${OS}" = "Cygwin" ] ; then
-	echo "jenkins_build_client"
-	${LODE_HOME}/bin/jenkins_build_client make 2>&1 | tee -a ${build_log}
-	R=${PIPESTATUS[0]}
+        echo "jenkins_build_client"
+        ${LODE_HOME}/bin/jenkins_build_client make 2>&1 | tee -a ${build_log}
+        R=${PIPESTATUS[0]}
     else
-	make 2>&1 | tee -a ${build_log}
-	R=${PIPESTATUS[0]}
+        make 2>&1 | tee -a ${build_log}
+        R=${PIPESTATUS[0]}
     fi
 fi
 
@@ -135,10 +188,14 @@ if [ -z "${start_time}" ] ;  then
 fi
 
 if [ "${mode}" == "tb" ] ; then
+
+    if [ -z "${name}" ] ; then
+	name="Jenkins_${os}"
+    fi
     cat <<EOF > build.log
 
 tinderbox: administrator: jenkins
-tinderbox: buildname: Jenkins_${os}
+tinderbox: buildname: ${name}
 tinderbox: tree: ${tb_branch}
 tinderbox: starttime: ${start_time?}
 tinderbox: timenow: `date -u '+%s'`
