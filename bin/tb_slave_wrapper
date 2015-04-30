@@ -60,7 +60,7 @@ start_time=
 clean=
 mode=tb
 name=
-check=
+target=
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -89,7 +89,7 @@ while [ "${1}" != "" ]; do
             name="$arg"
 	        ;;
         --check)
-            check=1
+            target="check"
             ;;
 	    --mode)
 	        mode="$arg"
@@ -171,19 +171,14 @@ fi
 #fi
 
 if [ "$R" = "0" ] ; then
+    cat config_host.mk >> "${build_log?}"
     if [ "${OS}" = "Cygwin" ] ; then
         echo "jenkins_build_client"
         ${LODE_HOME}/bin/jenkins_build_client make 2>&1 | tee -a ${build_log}
         R=${PIPESTATUS[0]}
     else
-        make 2>&1 | tee -a ${build_log}
+        make $target 2>&1 | tee -a ${build_log}
         R=${PIPESTATUS[0]}
-        if [ "$check" = "1" ] ; then
-            if [ "$R" = "0" ] ; then
-                make check 2>&1 | tee -a ${build_log}
-                R=${PIPESTATUS[0]}
-            fi
-        fi
     fi
 fi
 
