@@ -60,6 +60,7 @@ start_time=
 clean=
 mode=tb
 name=
+check=
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -72,27 +73,30 @@ while [ "${1}" != "" ]; do
     fi
 
     case "${parm}" in
-	--branch|-b)
-	    tb_branch="$arg"
-	    ;;
-	--os)
-	    os="$arg"
-	    ;;
-	--real)
-	    start_time=`date -u '+%s'`
-	    ;;
-	--clean)
-	    clean=1
-	    ;;
-	--name)
+	    --branch|-b)
+	        tb_branch="$arg"
+	        ;;
+	    --os)
+	        os="$arg"
+	        ;;
+	    --real)
+	        start_time=`date -u '+%s'`
+	        ;;
+	    --clean)
+	        clean=1
+	        ;;
+	    --name)
             name="$arg"
-	    ;;
-	--mode)
-	    mode="$arg"
-	    ;;
-	--config)
-	    process_config "$arg"
-	    ;;
+	        ;;
+        --check)
+            check=1
+            ;;
+	    --mode)
+	        mode="$arg"
+	        ;;
+	    --config)
+	        process_config "$arg"
+	        ;;
         -*)
             die "Invalid option $1"
             ;;
@@ -174,6 +178,12 @@ if [ "$R" = "0" ] ; then
     else
         make 2>&1 | tee -a ${build_log}
         R=${PIPESTATUS[0]}
+        if [ "$check" = "1" ] ; then
+            if [ "$R" = "0" ] ; then
+                make check 2>&1 | tee -a ${build_log}
+                R=${PIPESTATUS[0]}
+            fi
+        fi
     fi
 fi
 

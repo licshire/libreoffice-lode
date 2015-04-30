@@ -1,7 +1,7 @@
 #!/bin/bash
 exec 4<>/dev/tcp/localhost/2628 || exit 1
 echo -e "$(cygpath -m "$(pwd)")\n$@" >&4
-while read l; do p=$l; echo $l ; done <&4
+while read l; do p=$l; echo "$l" ; done <&4
 if [ "$p" == "#######SUCCESS#######" ]; then exit 0; fi
 exit 1
 
