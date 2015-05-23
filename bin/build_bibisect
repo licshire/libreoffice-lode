@@ -229,7 +229,7 @@ EOF
     rm "${SOURCE_GIT_REPO?}/commit.msgs"
     popd > /dev/null
     echo "$sha good" >> "${METADATA_DIR}/commit_list.done.pushed"
-    echo "sha" > "${METADATA_DIR?}/resume_sha"
+    echo "$sha" > "${METADATA_DIR?}/resume_sha"
 
     echo " Committed"
 }
