@@ -1,0 +1,328 @@
+#!/bin/bash
+# -*- tab-width : 4; indent-tabs-mode : nil -*-
+#
+#    Copyright (C) 2015 Norbert Thiebaud
+#    License: GPLv3
+#
+
+# run debug=1 setup ... to debug
+if [ -n "$debug" ] ; then
+    set -x
+fi
+
+die()
+{
+    echo  "$@" 1>&2
+    exit 1;
+}
+
+usage()
+{
+    cat <<EOF
+
+build_bibisect --epoch=<epoch_name> [ --count=<count> ]
+
+the program will try to build all the commmit (max <count> if specified)
+that are left to be build based on the current state of the bibisect
+and etiehr going to the head of the EPOCH_BRANCH or origin/master if the former
+does not exist yet.
+
+Note: <count> is only decreased in case of sucessfully added commit
+that is because we can only restart on 'good' boundary, since we use bibisect to
+firgure out safely the restart point
+
+in ~/.bibisect/<epoch_name> there need to be:
+
+EPOCH_START_POINT=<tag of the start of the epoch> (libreoffice-4-4-branch-point i.e the branching point of the previous epoch)
+EPOCH_BRANCH=<branch_name for the epoch> (libreoffice-5-0)
+SOURCE_GIT_REPO=<path to the source git repo>
+TARGET_GIT_REPO=<path to the bibisect repo (will be created if needed)
+
+EOF
+}
+
+setup()
+{
+
+    if [ -z "$EPOCH_START_POINT" ] ; then
+        die "Missing EPOCH_START_POINT"
+    fi
+
+    if [ -z "$EPOCH_BRANCH" ] ; then
+        die "Missing EPOCH_BRANCH"
+    fi
+    if [ -z "$SOURCE_GIT_REPO" ] ; then
+        die "Missing SOURCE_GIT_REPO"
+    fi
+    if [ ! -d "${SOURCE_GIT_REPO?}" -o ! -d "${SOURCE_GIT_REPO?}/.git" -o ! -d "${SOURCE_GIT_REPO?}/sal" ] ; then
+        die "The source ${SOURCE_GIT_REPO?} does not appear to be a LibreOffice core.git"
+    fi
+    if [ -z "$METADATA_DIR" ] ; then
+        METADATA_DIR=~/.bibisect/${bibisect_epoch?}.d
+    fi
+    if [ ! -d "${METADATA_DIR?}" ] ; then
+        mkdir -p "${METADATA_DIR?}" || die "Cannot create the metadata dir: ${METADATA_DIR?}"
+    fi
+
+    if [ ! -d "${TARGET_GIT_REPO?}" ] ; then
+        mkdir -p "${TARGET_GIT_REPO?}" || die "Error creating the Target git repo location ${TARGET_GIT_REPO?}"
+        pushd "${TARGET_GIT_REPO?}" > /dev/null || die "Cannot cd to ${TARGET_GIT_REPO?}"
+        git init --quiet
+        popd > /dev/null
+    else
+        if [ ! -d "${TARGET_GIT_REPO?}/.git" ] ; then
+            die "The Target git repo ${TARGET_GIT_REPO?} does not appear to be a git repo"
+        fi
+    fi
+}
+
+recover_resume_sha()
+{
+    local master_sha
+
+    pushd "${TARGET_GIT_REPO?}" > /dev/null || die "Cannot cd to the source repo ${TARGET_GIT_REPO?}"
+    master_sha=$(git rev-parse master 2> /dev/null)
+    if [ -z "$master_sha" -o "$master_sha" = "master" ] ; then
+    # empty bibibsect repo.. the resume is the sha just before the begin tag"
+        pushd "${SOURCE_GIT_REPO?}" > /dev/null || die "Cannot cd to the source repo ${SOURCE_GIT_REPO?}"
+        resume_sha=$(git log -1 --format="%H" "${EPOCH_START_POINT}^" 2>/dev/null)
+        if [ -z "$resume_sha" ] ; then
+            die "Could not determine the resume point based one ${EPOCH_START_POINT?}"
+        fi
+        popd > /dev/null
+    else
+        resume_sha="$(git log -1 master | grep "source sha" | head -n 1 | sed -e "s/.*://")"
+        if [ -z "$resume_sha" ] ; then
+            die "Could not determine the resume point based bibisect current master"
+        fi
+    fi
+    popd > /dev/null
+    echo "$resume_sha" > "${METADATA_DIR?}/resume_sha"
+}
+
+is_source_sha_exist()
+{
+    pushd "${SOURCE_GIT_REPO?}" > /dev/null
+    if [ "$(git cat-file -t "$1" 2> /dev/null)" = "commit" ] ; then
+        echo "$1"
+    fi
+    popd > /dev/null
+}
+
+determine_resume_sha()
+{
+    # this set the variable resume_sha or die
+    # resume_sha is the source sha just prior to the next source to build
+    if [ ! -f "${METADATA_DIR?}/resume_sha" ] ; then
+        recover_resume_sha
+    else
+        resume_sha=$(cat "${METADATA_DIR?}/resume_sha")
+        resume_sha=$(is_source_sha_exist "$resume_sha")
+        if [ -z "$resume_sha" ] ; then
+            recover_resume_sha
+        fi
+    fi
+}
+
+determine_todo_shas()
+{
+    pushd "${SOURCE_GIT_REPO?}" > /dev/null
+    end_sha=$(git rev-parse "${EPOCH_BRANCH?}" 2> /dev/null)
+    if [ -z "$end_sha" -o "$end_sha" = "${EPOCH_BRANCH?}" ] ; then
+        end_sha=$(git rev-parse origin/master 2> /dev/null)
+    fi
+    if [ -z "$end_sha" -o "$end_sha" = "master" ] ; then
+        die "cannot determine end sha"
+    fi
+    last_done_sha=${resume_sha}
+    todo_list=$(git log --first-parent --reverse --format="%H" ${resume_sha}..${end_sha} | tail -n +1)
+    todo_n=$(echo "$todo_list" | wc -l)
+    echo "build to do:$todo_n"
+    popd > /dev/null
+}
+
+build()
+{
+    local stashed=0
+
+    echo -n "$n / $todo_n building $sha : "
+    pushd "${SOURCE_GIT_REPO?}" > /dev/null
+    echo -n "stash "
+    git stash > build.log 2>&1 || die "stashing"
+    echo -n "reset "
+    git reset --hard ${sha?} >> build.log 2>&1 || die "cannot reset  to ${sha}"
+    echo -n "pop "
+    git stash pop >> build.log 2>&1  || "die stash poping"
+
+    sleep 2
+    if [ ! -e Makefile ] ; then
+        ./autogen.sh >> build.log 2>&1
+    fi
+    make build-nocheck >> build.log 2>&1
+    if [ $? -eq 0 ] ; then
+        echo "$sha good" >> "${METADATA_DIR?}/commit_list.done"
+        echo " Success."
+    else
+        mv build.log "${METADATA_DIR?}/$sha.log.bad"
+        echo "$sha bad" >> "${METADATA_DIR?}/commit_list.done"
+        echo " Failed."
+        sha=
+    fi
+    popd > /dev/null
+}
+
+add_bibisect_Darwin()
+{
+    echo -n "Adding $sha ..."
+	dmg=$(ls -1 ${SOURCE_GIT_REPO?}/workdir/installation/LibreOffice_Dev/dmg/install/en-US/*.dmg)
+
+    if [ -z "$dmg" -o ! -f $dmg ] ; then
+        die "weird no dmg"
+    fi
+	hdiutil attach -nobrowse "${dmg?}" > /dev/null || die "opening dmg $dmg"
+    pushd /Volumes/LibreOfficeDev > /dev/null || die "can't cd to mounted volume"
+    rm -fr "${TARGET_GIT_REPO?}/LibreOffice.app"
+    if [ -d LibreOffice.app ] ; then
+        cp -a LibreOffice.app ${TARGET_GIT_REPO?}/.
+    elif [ -d LibreOfficeDev.app ] ; then
+        cp -a LibreOfficeDev.app ${TARGET_GIT_REPO?}/LibreOffice.app
+    else
+        die "No LibreOffice.app found to copy"
+    fi
+    popd > /dev/null
+    sleep 1
+	hdiutil detach /Volumes/LibreOfficeDev > /dev/null 2>&1 || die "error detaching the volume"
+
+    pushd "${TARGET_GIT_REPO?}" > /dev/null
+    git add -A LibreOffice.app
+
+    pushd "${SOURCE_GIT_REPO?}" > /dev/null
+    cat << EOF > commit.msgs
+source sha:${sha?}
+
+$(git log --pretty="format:source sha:%H" ${last_done_sha?}..${sha?})
+EOF
+
+    popd > /dev/null
+    echo -n " committing"
+    git commit -q -F "${SOURCE_GIT_REPO?}/commit.msgs" || die "error committing $sha"
+    last_done_sha="${sha?}"
+    rm "${SOURCE_GIT_REPO?}/commit.msgs"
+    popd > /dev/null
+    echo "$sha good" >> "${METADATA_DIR}/commit_list.done.pushed"
+    echo "sha" > "${METADATA_DIR?}/resume_sha"
+
+    echo " Committed"
+}
+
+add_bibisect_Cygwin()
+{
+    echo -n "Adding $sha ..."
+    rm -fr "${TARGET_GIT_REPO?}/instdir"
+    cp -r "${SOURCE_GIT_REPO?}/instdir" "${TARGET_GIT_REPO?}/."
+
+    pushd "${TARGET_GIT_REPO?}" > /dev/null
+    git add -A instdir
+
+    pushd "${SOURCE_GIT_REPO?}" > /dev/null
+    cat << EOF > commit.msgs
+source sha:${sha?}
+
+$(git log --pretty="format:source sha:%H" ${last_done_sha?}..${sha?})
+EOF
+
+    popd > /dev/null
+    echo -n " committing"
+    git commit -q -F "${SOURCE_GIT_REPO?}/commit.msgs" || die "error committing $sha"
+    last_done_sha="${sha?}"
+    rm "${SOURCE_GIT_REPO?}/commit.msgs"
+    popd > /dev/null
+    echo "$sha good" >> "${METADATA_DIR}/commit_list.done.pushed"
+    echo "$sha" > "${METADATA_DIR?}/resume_sha"
+
+    echo " Committed"
+
+}
+
+if [ -z "$LODE_HOME" ] ; then
+    die "LODE_HOME not set"
+fi
+
+bibisect_epoch=
+count=
+os=$(uname -s)
+if [ "$os" != "Darwin" -a "$os" != "Linux" ] ; then
+    os=$(uname -o)
+fi
+
+while [ "${1}" != "" ]; do
+    parm=${1%%=*}
+    arg=${1#*=}
+    has_arg=
+    if [ "${1}" != "${parm?}" ] ; then
+        has_arg=1
+    else
+        arg=""
+    fi
+
+    case "${parm}" in
+        --epoch)
+            bibisect_epoch="$arg"
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        --count)
+            count="$arg"
+            ;;
+        -*)
+            die "Invalid option $1"
+            ;;
+        *)
+            die "Invalid argument $1"
+            ;;
+    esac
+    shift
+done
+
+if [ -z "$bibisect_epoch" ] ; then
+    die "missing parameter --epoch"
+fi
+
+if [ ! -f ~/.bibisect/$bibisect_epoch ] ; then
+    die "missing ~/.bibisect/$bibisect_epoch"
+fi
+
+source ~/.bibisect/$bibisect_epoch ] || die "Error sourcing epoch configuration"
+
+
+setup
+
+determine_resume_sha
+
+determine_todo_shas
+
+n=1
+
+for sha in $todo_list ; do
+    build "$sha"
+    if [ -n "$sha" ] ; then
+        add_bibisect_$os
+        if [ -n "$count" ] ; then
+            count="$(($count - 1))"
+            if [ $count -lt 1 ] ; then
+                echo "Quota Done."
+                exit 0;
+            fi
+        fi
+        if [ -f "${METADATA_DIR?}/stop" ] ; then
+            rm "${METADATA_DIR?}/stop"
+            echo "Stopped."
+            exit 0;
+        fi
+    fi
+    n=$(($n + 1))
+done
+
+echo "Done."

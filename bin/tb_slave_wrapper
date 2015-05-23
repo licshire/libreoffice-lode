@@ -17,11 +17,11 @@ adjust_config()
     neg="$2"
 
     if [ ! -f autogen.input.job ] ; then
-	if [ -f autogen.input.base ] ; then
-	    cp autogen.input.base autogen.input.job
-	else
-	    touch autogen.input.job
-	fi
+        if [ -f autogen.input.base ] ; then
+            cp autogen.input.base autogen.input.job
+        else
+            touch autogen.input.job
+        fi
     fi
     grep -v "${neg}" autogen.input.job 2> /dev/null > autogen.input.temp
     echo "${pos}" > autogen.input.temp
@@ -33,25 +33,35 @@ process_config()
     opt="$1"
 
     case "$opt" in
-	--enable-debug)
-	    adjust_config "--enable-debug" "--disable-debug"
-	    ;;
-	--disable-debug)
-	    adjust_config "--disable-debug" "--enable-debug"
-	    ;;
+        --enable-debug)
+            adjust_config "--enable-debug" "--disable-debug"
+            ;;
+        --disable-debug)
+            adjust_config "--disable-debug" "--enable-debug"
+            ;;
+        --enable-64-bit)
+            adjust_config "--enable-64-bit" "--disable-64-bit"
+            ;;
+        --disable-64-bit)
+            adjust_config "--disable-64-bit" "--enable-64-bit"
+            ;;
     esac
 }
 
 final_config()
 {
     if [ -f autogen.input.job ] ; then
-	cat autogen.input.job | sort -u > autogen.input.temp
-	diff -u autogen.input autogen.input.temp > /dev/null 2> /dev/null
-	if [ "$?" != "0" ] ; then
-	    mv autogen.input.temp autogen.input
-	else
-	    rm autogen.input.job
-	fi
+        cat autogen.input.job | sort -u > autogen.input.temp
+        diff -u autogen.input autogen.input.temp > /dev/null 2> /dev/null
+        if [ "$?" != "0" ] ; then
+            mv autogen.input.temp autogen.input
+        fi
+    else
+        if [ ! -f autogen.input ] ; then
+            if [ -f autogen.input.base ] ; then
+                cp autogen.input.base autogen.input
+            fi
+        fi
     fi
 }
 
@@ -73,30 +83,30 @@ while [ "${1}" != "" ]; do
     fi
 
     case "${parm}" in
-	    --branch|-b)
-	        tb_branch="$arg"
-	        ;;
-	    --os)
-	        os="$arg"
-	        ;;
-	    --real)
-	        start_time=`date -u '+%s'`
-	        ;;
-	    --clean)
-	        clean=1
-	        ;;
-	    --name)
+        --branch|-b)
+            tb_branch="$arg"
+            ;;
+        --os)
+            os="$arg"
+            ;;
+        --real)
+            start_time=`date -u '+%s'`
+            ;;
+        --clean)
+            clean=1
+            ;;
+        --name)
             name="$arg"
-	        ;;
+            ;;
         --check)
             target="check"
             ;;
-	    --mode)
-	        mode="$arg"
-	        ;;
-	    --config)
-	        process_config "$arg"
-	        ;;
+        --mode)
+            mode="$arg"
+            ;;
+        --config)
+            process_config "$arg"
+            ;;
         -*)
             die "Invalid option $1"
             ;;
@@ -138,9 +148,9 @@ rm -f build.log
 R=0
 if [ -f ${LODE_HOME?}/autogen.input.base ] ; then
     if [ ! -f autogen.input.base ] ; then
-	cp ${LODE_HOME?}/autogen.input.base autogen.input.base
+        cp ${LODE_HOME?}/autogen.input.base autogen.input.base
     elif [ ${LODE_HOME?}/autogen.input.base -nt autogen.input.base ] ; then
-	cp ${LODE_HOME?}/autogen.input.base autogen.input.base
+        cp ${LODE_HOME?}/autogen.input.base autogen.input.base
     fi
 fi
 
@@ -149,7 +159,7 @@ if [ ! -f Makefile ] ; then
     R=${PIPESTATUS[0]}
 
     if [ "$R" = "0" ] ; then
-	touch config_host.mk
+        touch config_host.mk
     fi
 fi
 if [ "$R" = "0" -a -f .clean_slave ] ; then
@@ -158,17 +168,6 @@ if [ "$R" = "0" -a -f .clean_slave ] ; then
 elif [ "$R" = "0" -a "$clean" = "1" ] ; then
     make clean 2>&1 | tee -a ${build_log}
 fi
-
-#if [ ${OS} = "Cygwin" ] ; then
-#    :
-#    export TMPDIR="$(cygpath -d $(pwd)/tempdir)"
-#    export TMP="$(cygpath -d $(pwd)/tempdir)"
-#    export TEMP="$(cygpath -d $(pwd)/tempdir)"
-#else
-#    export TMPDIR="cygpath -d $(pwd)/tempdir"
-#    export TMP="$(pwd)/tempdir"
-#    export TEMP="$(pwd)/tempdir"
-#fi
 
 if [ "$R" = "0" ] ; then
     cat config_host.mk >> "${build_log?}"
@@ -193,9 +192,8 @@ if [ -z "${start_time}" ] ;  then
 fi
 
 if [ "${mode}" == "tb" ] ; then
-
     if [ -z "${name}" ] ; then
-	name="Jenkins_${os}"
+        name="Jenkins_${os}"
     fi
     cat <<EOF > build.log
 
