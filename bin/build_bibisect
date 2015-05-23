@@ -341,11 +341,14 @@ determine_last_build_sha
 determine_todo_shas
 
 n=1
+has_error=0
 
 for sha in $todo_list ; do
     build "$sha"
     if [ -n "$sha" ] ; then
         add_bibisect_$os
+    else
+        has_error=1
     fi
     if [ -n "$move" -o -n "$sha" ] ; then
         if [ -n "$count" ] ; then
@@ -353,16 +356,17 @@ for sha in $todo_list ; do
             if [ $count -lt 1 ] ; then
                 echo "Quota Done."
                 rm -f "${METADATA_DIR?}/stop"
-                exit 0;
+                exit $has_error
             fi
         fi
     fi
     if [ -f "${METADATA_DIR?}/stop" ] ; then
         rm "${METADATA_DIR?}/stop"
         echo "Stopped."
-        exit 0;
+        exit $has_error
     fi
     n=$(($n + 1))
 done
 
 echo "Done."
+exit $has_error
