@@ -132,7 +132,7 @@ determine_last_build_sha()
     else
         last_build_sha=$(cat "${METADATA_DIR?}/last_build_sha")
         last_build_sha=$(is_source_sha_exist "$last_build_sha")
-        if [ -z "$last_done" ] ; then
+        if [ -z "$last_build_sha" ] ; then
             last_build_sha=${resume_sha?}
         fi
     fi
