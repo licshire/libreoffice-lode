@@ -20,16 +20,15 @@ usage()
 {
     cat <<EOF
 
-build_bibisect --epoch=<epoch_name> [ --count=<count> ]
+build_bibisect --epoch=<epoch_name> [ --count=<count> ] [ --move] [--fetch]
 
 the program will try to build all the commmit (max <count> if specified)
 that are left to be build based on the current state of the bibisect
-and etiehr going to the head of the EPOCH_BRANCH or origin/master if the former
+and either going to the head of the EPOCH_BRANCH or origin/master if the former
 does not exist yet.
 
-Note: <count> is only decreased in case of sucessfully added commit
-that is because we can only restart on 'good' boundary, since we use bibisect to
-firgure out safely the restart point
+--move indicate that we want to count 'fail' toward --count
+and on restart we do not retry the last failure streak (in any)
 
 in ~/.bibisect/<epoch_name> there need to be:
 
@@ -124,18 +123,36 @@ determine_resume_sha()
     fi
 }
 
+determine_last_build_sha()
+{
+    # this set the variable resume_sha or die
+    # resume_sha is the source sha just prior to the next source to build
+    if [ ! -f "${METADATA_DIR?}/last_build_sha" ] ; then
+        last_build_sha=$recover_resume_sha
+    else
+        last_build_sha=$(cat "${METADATA_DIR?}/last_build_sha")
+        last_build_sha=$(is_source_sha_exist "$last_build_sha")
+        if [ -z "$last_done" ] ; then
+            last_build_sha=$recover_resume_sha
+        fi
+    fi
+}
+
 determine_todo_shas()
 {
     pushd "${SOURCE_GIT_REPO?}" > /dev/null
-    end_sha=$(git rev-parse "${EPOCH_BRANCH?}" 2> /dev/null)
-    if [ -z "$end_sha" -o "$end_sha" = "${EPOCH_BRANCH?}" ] ; then
+    if [ -n "$fetch" ] ; then
+        git fetch
+    fi
+    end_sha=$(git rev-parse "origin/${EPOCH_BRANCH?}" 2> /dev/null)
+    if [ -z "$end_sha" -o "$end_sha" = "origin/${EPOCH_BRANCH?}" ] ; then
         end_sha=$(git rev-parse origin/master 2> /dev/null)
     fi
     if [ -z "$end_sha" -o "$end_sha" = "master" ] ; then
         die "cannot determine end sha"
     fi
     last_done_sha=${resume_sha}
-    todo_list=$(git log --first-parent --reverse --format="%H" ${resume_sha}..${end_sha} | tail -n +1)
+    todo_list=$(git log --first-parent --reverse --format="%H" ${last_build_sha}..${end_sha} | tail -n +1)
     todo_n=$(echo "$todo_list" | wc -l)
     echo "build to do:$todo_n"
     popd > /dev/null
@@ -147,12 +164,12 @@ build()
 
     echo -n "$n / $todo_n building $sha : "
     pushd "${SOURCE_GIT_REPO?}" > /dev/null
-    echo -n "stash "
-    git stash > build.log 2>&1 || die "stashing"
+#    echo -n "stash "
+#    git stash > build.log 2>&1 || die "stashing"
     echo -n "reset "
     git reset --hard ${sha?} >> build.log 2>&1 || die "cannot reset  to ${sha}"
-    echo -n "pop "
-    git stash pop >> build.log 2>&1  || "die stash poping"
+#    echo -n "pop "
+#    git stash pop >> build.log 2>&1  || "die stash poping"
 
     sleep 2
     if [ ! -e Makefile ] ; then
@@ -162,10 +179,12 @@ build()
     if [ $? -eq 0 ] ; then
         echo "$sha good" >> "${METADATA_DIR?}/commit_list.done"
         echo " Success."
+        echo "$sha" > "${METADATA_DIR?}/last_build_sha"
     else
         mv build.log "${METADATA_DIR?}/$sha.log.bad"
         echo "$sha bad" >> "${METADATA_DIR?}/commit_list.done"
         echo " Failed."
+        echo "$sha" > "${METADATA_DIR?}/last_build_sha"
         sha=
     fi
     popd > /dev/null
@@ -250,6 +269,9 @@ fi
 
 bibisect_epoch=
 count=
+move=
+fetch=
+
 os=$(uname -s)
 if [ "$os" != "Darwin" -a "$os" != "Linux" ] ; then
     os=$(uname -o)
@@ -276,6 +298,12 @@ while [ "${1}" != "" ]; do
         --count)
             count="$arg"
             ;;
+        --fetch)
+            fetch=1
+            ;;
+        --move)
+            move=1
+            ;;
         -*)
             die "Invalid option $1"
             ;;
@@ -299,7 +327,16 @@ source ~/.bibisect/$bibisect_epoch ] || die "Error sourcing epoch configuration"
 
 setup
 
+# in the 'move' mode we do not retry to build the lastest failed
+# build streak
+# other we do
+if [ -z "$move" ] ; then
+    rm -f "${METADATA_DIR?}/last_build_sha"
+fi
+
 determine_resume_sha
+
+determine_last_build_sha
 
 determine_todo_shas
 
@@ -309,18 +346,21 @@ for sha in $todo_list ; do
     build "$sha"
     if [ -n "$sha" ] ; then
         add_bibisect_$os
+    fi
+    if [ -n "$move" -o -n "$sha" ] ; then
         if [ -n "$count" ] ; then
             count="$(($count - 1))"
             if [ $count -lt 1 ] ; then
                 echo "Quota Done."
+                rm -f "${METADATA_DIR?}/stop"
                 exit 0;
             fi
         fi
-        if [ -f "${METADATA_DIR?}/stop" ] ; then
-            rm "${METADATA_DIR?}/stop"
-            echo "Stopped."
-            exit 0;
-        fi
+    fi
+    if [ -f "${METADATA_DIR?}/stop" ] ; then
+        rm "${METADATA_DIR?}/stop"
+        echo "Stopped."
+        exit 0;
     fi
     n=$(($n + 1))
 done
