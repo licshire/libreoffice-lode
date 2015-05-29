@@ -65,6 +65,23 @@ final_config()
     fi
 }
 
+setup_tempdir()
+{
+    rm -fr tempdir
+    mkdir tempdir
+    saved_TMPDIR="$TMPDIR"
+    export TMPDIR="$(pwd)/tempdir"
+    export TMP="$TMPDIR"
+    echo "set TMPDIR=$TMPDIR"
+}
+
+restore_tempdir()
+{
+    export TMPDIR="${saved_TMPDIR?}"
+    export TMP="$TMPDIR"
+}
+
+
 os=$(uname)
 start_time=
 clean=
@@ -127,6 +144,10 @@ case "$(uname)" in
     CYGWIN*)
         OS="Cygwin"
         ;;
+    *)
+        echo "Unsupported OS:$(uname)"
+        exit 2
+        ;;
 esac
 
 echo "OS:${OS}"
@@ -140,8 +161,6 @@ else
     build_log="build.log"
 fi
 
-rm -fr tempdir
-mkdir tempdir
 rm -f build.log.tmp
 rm -f build.log
 
@@ -153,6 +172,8 @@ if [ -f ${LODE_HOME?}/autogen.input.base ] ; then
         cp ${LODE_HOME?}/autogen.input.base autogen.input.base
     fi
 fi
+
+setup_tempdir
 
 if [ ! -f Makefile ] ; then
     ./autogen.sh 2>&1 | tee -a ${build_log}
@@ -180,6 +201,8 @@ if [ "$R" = "0" ] ; then
         R=${PIPESTATUS[0]}
     fi
 fi
+
+restore_tempdir
 
 if [ "$R" = "0" ] ; then
     S="success"

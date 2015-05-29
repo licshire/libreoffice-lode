@@ -3,4 +3,4 @@
 .PHONY: all
 
 all:
-	make && echo '#######SUCCESS#######';
+	TMP="`pwd`/tempdir" TMPDIR="`pwd`/tempdir" make && echo '#######SUCCESS#######';
