@@ -39,6 +39,12 @@ process_config()
         --disable-debug)
             adjust_config "--disable-debug" "--enable-debug"
             ;;
+        --disable-dbgutil)
+            adjust_config "--disable-dbgutil" "--enable-dbgutil"
+            ;;
+        --enable-dbgutil)
+            adjust_config "--enable-dbgutil" "--disable-dbgutil"
+            ;;
         --enable-64-bit)
             adjust_config "--enable-64-bit" "--disable-64-bit"
             ;;
