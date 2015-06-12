@@ -181,7 +181,8 @@ fi
 
 setup_tempdir
 
-if [ ! -f Makefile ] ; then
+if [ ! -f Makefile -o Makefile -ot configure.ac ] ; then
+    echo "./autogen.sh 2>&1" | tee -a ${build_log}
     ./autogen.sh 2>&1 | tee -a ${build_log}
     R=${PIPESTATUS[0]}
 
@@ -190,6 +191,7 @@ if [ ! -f Makefile ] ; then
     fi
 fi
 if [ "$R" = "0" -a -f .clean_slave ] ; then
+    echo "make clean" 2>&1 | tee -a ${build_log}
     make clean 2>&1 | tee -a ${build_log}
     rm .clean_slave
 elif [ "$R" = "0" -a "$clean" = "1" ] ; then
@@ -197,12 +199,13 @@ elif [ "$R" = "0" -a "$clean" = "1" ] ; then
 fi
 
 if [ "$R" = "0" ] ; then
-    cat config_host.mk >> "${build_log?}"
+    cat config_host.mk | tee -a "${build_log?}"
     if [ "${OS}" = "Cygwin" ] ; then
-        echo "jenkins_build_client"
-        ${LODE_HOME}/bin/jenkins_build_client make 2>&1 | tee -a ${build_log}
+        echo "jenkins_build_client make $target"
+        ${LODE_HOME}/bin/jenkins_build_client make $target 2>&1 | tee -a ${build_log}
         R=${PIPESTATUS[0]}
     else
+        echo "make $target" 2>&1 | tee -a ${build_log}
         make $target 2>&1 | tee -a ${build_log}
         R=${PIPESTATUS[0]}
     fi
