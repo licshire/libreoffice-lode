@@ -8,33 +8,8 @@ if( $user = '' )
 
 $password = Read-Host 'What is the password?'
 
-Push-Location
-Set-Location HKLM\Software\Microsoft\Windows NT\CurrentVersion\winlogon
-if(Get-ItemProperty -PATH . -Name AutoAdminLogon -ea 0).AutoAdminLogon)
-{
-	'AutoAdminLogon already exist'
-}
-else
-{
-	Set-ItemProperty -PATH . -Name AutoAdminLogon -Value '1'
-}
+$RegPath = "HKLM\Software\Microsoft\Windows NT\CurrentVersion\winlogon"
+Set-ItemProperty $RegPAth "AutoAdminLogon" -Value "1" -type String
+Set-ItemProperty $RegPAth "DefaultUsername" -Value "$user" -type String
+Set-ItemProperty $RegPAth "DefaultPassword" -Value "$password" -type String
 
-if(Get-ItemProperty -PATH . -Name DefaultUsername -ea 0).DefaultUsername = "$user")
-{
-	'AutoAdminLogon already exist and correct'
-}
-else
-{
-	Set-ItemProperty -PATH . -Name DefaultUsername -Value "$user"
-}
-
-if(Get-ItemProperty -PATH . -Name DefaultUsername -ea 0).DefaultUsername = $password)
-{
-	'AutoAdminLogon already exist and correct'
-}
-else
-{
-	Set-ItemProperty -PATH . -Name DefaultUsername -Value "$password"
-}
-
-Pop-Location
