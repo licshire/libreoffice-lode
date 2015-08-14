@@ -17,7 +17,8 @@ if ( "$ENV{LODE_HOME}" eq "")
     die "LODE_HOME not set";
 }
 $SIG{PIPE} = 'IGNORE';
-$SIG{ALRM} = sub { system("TASKKILL /F /T /PID $pid");
+$SIG{ALRM} = sub { chdir "$ENV{LODE_HOME}";
+                   system("TASKKILL /F /T /PID $pid");
                    print $client "\n######TIMED-OUT######\n";
                    die "timeout\n";
 };
@@ -73,6 +74,7 @@ sub processit
                                 if( ! print $lclient "$_")
                                 {
                                     print "client bailed\n";
+                                    chdir "$ENV{LODE_HOME}";
                                     system("TASKKILL /F /T /PID $pid");
                                     last;
                                 }
@@ -104,6 +106,7 @@ sub processit
                         print "bad command\n";
                         print $lclient "bad command :". $cmd . "\n";
                     }
+                    chdir "$ENV{LODE_HOME}";
                 }
                 else
                 {
