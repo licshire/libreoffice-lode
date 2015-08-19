@@ -97,6 +97,7 @@ clean=
 mode=tb
 name=
 target=
+fetch=
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -126,6 +127,12 @@ while [ "${1}" != "" ]; do
             ;;
         --check)
             target="check"
+            ;;
+        --perf)
+            target="perfcheck"
+            ;;
+        --fetch)
+            fetch="$arg"
             ;;
         --mode)
             mode="$arg"
@@ -174,6 +181,11 @@ rm -f build.log.tmp
 rm -f build.log
 
 R=0
+
+if [ "$R" = "0" -a "$fetch" != "" ] ; then
+    git pull -r || R=1
+fi
+
 if [ -f ${LODE_HOME?}/autogen.input.base ] ; then
     if [ ! -f autogen.input.base ] ; then
         cp ${LODE_HOME?}/autogen.input.base autogen.input.base
