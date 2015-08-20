@@ -148,8 +148,39 @@ generate_html()
     margin: 4px 0;
     text-align: center;
   }
+  #top-banner {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    min-width: -moz-min-content;
+    background-color: #00A500;
+    border-color: transparent;
+  }
+  #top-title {
+    color: #E0E0E0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    white-space: nowrap;
+    background-color: #00A500;
+  }
+  #top-title h2 {
+    margin-bottom: 0;
+  }
+  #top-title p {
+    margin: 0;
+  }
+  #logo {
+    margin: 15px;
+  }
 </style>
 
+<div id="top-banner">
+<div id="logo"><img alt=:logo" src="img/logo.png"></img></div>
+<div id="top-title">
+<h2>LibreOffice result of perfcheck</h2>
+<p style="font-size:50%">As of $(date -u)</p>
+</div>
+</div>
 <div id="main">
 EOF
 
