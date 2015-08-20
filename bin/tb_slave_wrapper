@@ -51,8 +51,8 @@ process_config()
         --disable-64-bit)
             adjust_config "--disable-64-bit" "--enable-64-bit"
             ;;
-        --enable-synbol)
-            adjust_config "--enable-symbol" "--disable-symbol"
+        --enable-symbols)
+            adjust_config "--enable-symbols" "--disable-symbols"
             ;;
     esac
 }
