@@ -182,6 +182,27 @@ test_git_or_mirror_clone()
     fi
 }
 
+
+#
+# download and untar a package
+#
+fetch_and_unpack_package()
+{
+    local module="$1"
+    local version="$2"
+    local base_url="$3"
+    local fn="$4"
+
+    if [ -z "${module}" -o -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
+        die "Mssing/Invalid parameter to install_generic_conf_make_install()"
+    fi
+    pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
+    rm -fr "${BASE_DIR?}/packages/${module?}-${version?}"
+    rm -f "${BASE_DIR?}/packages/${fn?}"
+    get_remote_file "${base_url?}/${fn?}"
+    tar -xf ${fn?} || die "Error untaring ${module?} source"
+    popd > /dev/null
+}
 #
 # test if a module is installed
 # if not do the standard configure/make/make install dance
@@ -196,22 +217,71 @@ install_generic_conf_make_install()
     if [ -z "${module}" -o -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
         die "Mssing/Invalid parameter to install_generic_conf_make_install()"
     fi
-    if [ ! -x "${BASE_DIR?}/opt/bin/${module?}" -o ! -d "${BASE_DIR?}/packages/${module?}-${version?}" ] ; then
-        pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
-        rm -fr "${BASE_DIR?}/packages/${module?}-${version?}"
-        rm -f "${BASE_DIR?}/packages/${fn?}"
-        get_remote_file ${base_url?}/${fn?}
-        tar -xf ${fn?} || die "Error untaring ${module?} source"
-        pushd ${module?}-${version?} > /dev/null
-        ./configure --prefix=${BASE_DIR}/opt || die "Error configuring ${module?}"
+    if [ ! -x "${BASE_DIR?}/opt/bin/${module?}" -o ! -d "${BASE_DIR?}/packages/${module?}-${version?}" -o -f "${BASE_DIR?}/packages/${module?}-${version?}/.lode_building" ]; then
+        echo "installing ${module?}..." 1>&2
+        fetch_and_unpack_package "${module?}" "${version?}" "${base_url?}" "$fn"
+        pushd "${BASE_DIR?}/packages/${module?}-${version?}" > /dev/null || die "Error cd-ing to ${module} source tree"
+        touch .lode_building
+        ./configure --prefix="${BASE_DIR?}/opt" || die "Error configuring ${module?}"
         make || die "error building ${module?}"
         make install || die "error installing ${module?}"
-        popd > /dev/null
+        rm .lode_building
         popd > /dev/null
         echo "${module?} Installed" 1>&2
     else
         echo "${module?} already installed" 1>&2
     fi
+}
+
+install_private_cmake()
+{
+    local module="cmake"
+    local version="$1"
+    local base_url="$2"
+    local fn="$3"
+
+    if [ -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
+        die "Mssing/Invalid parameter to install_private_cmake()"
+    fi
+    if [ ! -x "${BASE_DIR?}/opt/private_lode/bin/${module?}" -o -f "${BASE_DIR?}/packages/${module}-${version}/.lode_building" -o ! -d "${BASE_DIR?}/packages/${module}-${version?}" ]; then
+        echo "installing ${module?}..." 1>&2
+        fetch_and_unpack_package "${module?}" "${version?}" "${base_url?}" "$fn"
+        pushd "${BASE_DIR?}/packages/${module?}-${version?}" > /dev/null || die "cd-ing to cmake source directory"
+        touch .lode_building
+        ./bootstrap --prefix="${BASE_DIR?}/opt/lode_private" --parallel=$(sysctl -n hw.ncpu) || die "bootstraping cmake"
+        make -j $(sysctl -n hw.ncpu) || die "Error making ${module}"
+        make install || die "Errror installing ${module}"
+        rm .lode_building
+        popd > /dev/null
+    else
+        echo "${module?} already installed" 1>&2
+    fi
+}
+
+install_doxygen()
+{
+    local module="doxygen"
+    local version="$1"
+    local base_url="$2"
+    local fn="$3"
+
+    if [ -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
+        die "Mssing/Invalid parameter to install_private_cmake()"
+    fi
+    if [ ! -x "${BASE_DIR?}/opt/bin/${module?}" -o -f "${BASE_DIR?}/packages/${module}-${version}/.lode_building" -o ! -d "${BASE_DIR?}/packages/${module}-${version?}" ]; then
+        echo "installing ${module?}..." 1>&2
+        fetch_and_unpack_package "${module?}" "${version?}" "${base_url?}" "$fn"
+        pushd "${BASE_DIR?}/packages/${module?}-${version?}" > /dev/null || die "cd-ing to cmake source directory"
+        touch .lode_building
+        "${BASE_DIR?}/opt/lode_private/bin/cmake" -G "Unix Makefiles" -Denglish_only=YES -DCMAKE_INSTALL_PREFIX="${BASE_DIR?}/opt" || die "Error preparing make for doxygen"
+        make -j $(sysctl -n hw.ncpu) || die "error making doxygen"
+        make install || die "Errror installing ${module}"
+        rm .lode_building
+        popd > /dev/null
+    else
+        echo "${module?} already installed" 1>&2
+    fi
+
 }
 
 install_ant()
