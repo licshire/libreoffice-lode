@@ -5,11 +5,6 @@
 #
 
 
-install_default_autogen_input()
-{
-:
-}
-
 install_build_dep()
 {
     install_generic_conf_make_install "autoconf" "2.69" "http://mirrors.kernel.org/gnu/autoconf" "autoconf-2.69.tar.gz"
@@ -19,7 +14,6 @@ install_build_dep()
     install_junit
     install_generic_conf_make_install "doxygen" "1.8.8" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.8.src.tar.gz"
     install_generic_conf_make_install "ccache" "3.1.9" "https://www.samba.org/ftp/ccache" "ccache-3.1.9.tar.gz"
-    install_default_autogen_input
 }
 
 os_flavor_notes()

@@ -496,10 +496,7 @@ setup_dev()
     pushd core > /dev/null || die "Error swithing to dev/core"
     git config remote.origin.pushurl ssh://lode/core || die "Error setup the pushurl for core"
     if [ ! -f autogen.input ] ; then
-        if [ -f "${BASE_DIR?}/autogen.input.base" ] ; then
-            cat "${BASE_DIR?}/autogen.input.base" > autogen.input || die "Error populating autogen.input from autogen.input.base"
-        fi
-        echo "--enable-debug" >> autogen.input || die "Error adding --enable-debug to autogen.input"
+        echo "--enable-debug" > autogen.input || die "Error adding --enable-debug to autogen.input"
     fi
     popd > /dev/null || die "Error popping core"
     popd > /dev/null || die "Error poping dev"
