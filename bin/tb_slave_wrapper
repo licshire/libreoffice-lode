@@ -27,8 +27,8 @@ adjust_config()
 process_distro_config()
 {
     cfg="$1"
-    if [ -f "./distro-config/Jenkins/$cfg" ] ; then
-        cat "./distro-config/Jenkins/$cfg" > autogen.input.job.config
+    if [ -f "./distro-configs/Jenkins/$cfg" ] ; then
+        cat "./distro-configs/Jenkins/$cfg" > autogen.input.job.config
     fi
 }
 
