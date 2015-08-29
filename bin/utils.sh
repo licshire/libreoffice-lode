@@ -62,11 +62,19 @@ get_remote_file()
 {
     local url="$1"
     local f="$2"
-
-    if [ -n "$f" ] ; then
-       wget -O ${f?} ${url?} || die "Error download ${module?} source package"
+    which wget > /dev/null 2> /dev/null
+    if [ "$?" = "0" ] ; then
+        if [ -n "$f" ] ; then
+            wget -O ${f?} ${url?} || die "Error download ${module?} source package"
+        else
+            wget ${url?} || die "Error download ${module?} source package"
+        fi
     else
-        wget ${url?} || die "Error download ${module?} source package"
+        if [ -n "$f" ] ; then
+            curl -o ${f?} ${url?} || die "Error download ${module?} source package"
+        else
+            curl -O ${url?} || die "Error download ${module?} source package"
+        fi
     fi
 }
 
