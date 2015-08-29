@@ -1,0 +1,10 @@
+#!/bin/bash
+# -*- tab-width : 4; indent-tabs-mode : nil -*-
+#
+#    Copyright (C) 2015 Norbert Thiebaud
+#    License: GPLv3
+#
+
+#run all the suites
+
+${LODE_HOME}/adm/perfdbmgr/bin/loperf_suite --sha=$(git rev-parse HEAD) --exe=$(pwd)/instdir/program/soffice.bin $LODE_HOME/adm/test-files/loperf_suites/*_suite.cfg
