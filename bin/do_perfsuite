@@ -7,4 +7,4 @@
 
 #run all the suites
 
-${LODE_HOME}/adm/perfdbmgr/bin/loperf_suite --sha=$(git rev-parse HEAD) --exe=$(pwd)/instdir/program/soffice.bin $LODE_HOME/adm/test-files/loperf_suites/*_suite.cfg
+${LODE_HOME}/adm/perfdbmgr/bin/loperf_suite --sha=$(git rev-parse HEAD) --refresh --exe=$(pwd)/instdir/program/soffice.bin $LODE_HOME/adm/test-files/loperf_suites/*_suite.cfg
