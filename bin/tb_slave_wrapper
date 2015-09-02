@@ -156,8 +156,7 @@ while [ "${1}" != "" ]; do
             target="check"
             ;;
         --perfsuite)
-            target="build perfcheck"
-            extra=do_perfsuite
+            extra="do_perfsuite"
             ;;
         --fetch)
             fetch="$arg"
