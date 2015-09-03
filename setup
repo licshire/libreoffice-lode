@@ -47,7 +47,7 @@ DO_JENKINS=0
 DO_DEV=0
 DO_NEW=0
 DO_REFRESH=0
-DO_FORCE=1
+DO_FORCE=0
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
