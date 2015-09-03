@@ -42,5 +42,8 @@ determine_os_flavor()
 	    die "Unknown Darwin kernel version ${kernel}"
 	    ;;
     esac
+    if [ -n "$(type -p port 2> /dev/null)" ] ; then
+        die "lode does not support macport. more exactly macport can interfere with lode setup and LibreOffice build. please remove it from your PATH when doing lode work"
+    fi
     export PATH=${BASE_DIR}/opt/bin:$PATH
 }
