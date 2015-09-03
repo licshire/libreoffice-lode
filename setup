@@ -21,7 +21,7 @@ source "$BASE_DIR/bin/utils.sh"
 do_help()
 {
 cat <<EOF
-setup [ --help ] [ -v ] [ --prereq ] [ --jenkins ] [ --dev ] [ --new <name> ] [ --refresh ]
+setup [ --help ] [ -v ] [ --prereq ] [ --jenkins ] [ --dev ] [ --new <name> ] [ --refresh ] [ --force ]
 
 setup the necessary environment to build.
 run --prereq first to determine if your os version is currently supported by the tool
@@ -31,6 +31,7 @@ it will also tell you the list of thing, if any that need to be done prior to ru
 --dev setup a dev build environment in dev/core
 --new <name> create a clone of core in dev/<name>
 --refresh update the mirror repo and git gc the repos under dev
+--force reinstall the dependant packages.
 
 EOF
 }
@@ -46,6 +47,7 @@ DO_JENKINS=0
 DO_DEV=0
 DO_NEW=0
 DO_REFRESH=0
+DO_FORCE=1
 
 while [ "${1}" != "" ]; do
     parm=${1%%=*}
@@ -66,6 +68,9 @@ while [ "${1}" != "" ]; do
             ;;
         --refresh)
             DO_REFRESH=1
+            ;;
+        --force)
+            DO_FORCE=1
             ;;
         -h|--help)  # display help
             do_help

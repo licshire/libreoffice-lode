@@ -389,6 +389,9 @@ determine_os()
 
 setup_base_tree()
 {
+    if [ "$DO_FORCE" = 1 ] ; then
+        rm -fr "${BASE_DIR?}/opt"
+    fi
     test_create_dirs packages opt ext_tar adm tb
 }
 
