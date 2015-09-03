@@ -13,6 +13,22 @@ die()
     exit 1;
 }
 
+setup_git_hooks()
+{
+    pushd "${BASE_DIR?}/.git-hooks" > /dev/null || die "Error cd-ing to .git-hooks"
+    hooks=$(ls -1);
+    popd > /dev/null
+    pushd "${BASE_DIR?}/.git/hooks" > /dev/null || die "Error cd-ing to .git/hooks"
+
+    for hook in $hooks ; do
+        if [ ! -e "${hook?}" -o -L "${hook?}" ] ; then
+            rm -f "${hook?}"
+            ln -sf "../../.git-hooks/${hook?}" "${hook?}"
+        fi
+    done
+    popd > /dev/null
+}
+
 #
 # Test if a directory exist, if not create it
 #

@@ -32,7 +32,7 @@ it will also tell you the list of thing, if any that need to be done prior to ru
 --new <name> create a clone of core in dev/<name>
 --refresh update the mirror repo and git gc the repos under dev
 --force reinstall the dependant packages.
-
+--git-hooks for lode dev only: install the necessary git-hooks to be able to push a commit to lode via gerrit
 EOF
 }
 
@@ -71,6 +71,10 @@ while [ "${1}" != "" ]; do
             ;;
         --force)
             DO_FORCE=1
+            ;;
+        --git-hooks)
+            setup_git_hooks
+            exit
             ;;
         -h|--help)  # display help
             do_help
