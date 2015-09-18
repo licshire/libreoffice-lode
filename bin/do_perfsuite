@@ -5,6 +5,15 @@
 #    License: GPLv3
 #
 
+echo "refresh adm/perfdbmgr"
+pushd ${LODE_HOME}/adm/perfdbmgr > /dev/null
+git pull -r
+popd > /dev/null
+echo "refresh adm/test-files"
+pushd ${LODE_HOME}/adm/test-files > /dev/null
+git pull -r
+popd > /dev/null
+
 echo "make perfcheck"
 make perfcheck
 
