@@ -23,3 +23,17 @@ install_build_dep()
     determine_gstreamer
 }
 
+os_prereq()
+{
+    if [ -e /etc/os-release ]; then
+        . /etc/os-release
+        if [ "$NAME" == "openSUSE" ]; then
+            cat << EOF
+
+For openSUSE, you need to install build dependencies using 'zypper si -d libreoffice'
+EOF
+        fi
+    fi
+}
+
+# vim: set et sw=4 ts=4 textwidth=0:
