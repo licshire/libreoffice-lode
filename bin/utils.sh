@@ -267,7 +267,8 @@ install_private_cmake()
     if [ -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
         die "Mssing/Invalid parameter to install_private_cmake()"
     fi
-    if [ ! -x "${BASE_DIR?}/opt/private_lode/bin/${module?}" -o -f "${BASE_DIR?}/packages/${module}-${version}/.lode_building" -o ! -d "${BASE_DIR?}/packages/${module}-${version?}" ]; then
+
+    if [ ! -x "${BASE_DIR?}/opt/lode_private/bin/${module?}" -o -f "${BASE_DIR?}/packages/${module}-${version}/.lode_building" -o ! -d "${BASE_DIR?}/packages/${module}-${version?}" ]; then
         echo "installing ${module?}..." 1>&2
         fetch_and_unpack_package "${module?}" "${version?}" "${base_url?}" "$fn"
         pushd "${BASE_DIR?}/packages/${module?}-${version?}" > /dev/null || die "cd-ing to cmake source directory"
