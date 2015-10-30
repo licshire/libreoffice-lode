@@ -42,8 +42,9 @@ start $setup  "-B -n -N -q -d -D -L -X -s $site -l $temp -R $root" -Wait
 $packages = @"
  -P autoconf,automake,bison,cabextract,doxygen,flex,gcc-g++
  -P git,gnupg,gperf,libxml2-devel,libpng12-devel,make,mintty
- -P openssh,openssl,patch,perl,pkg-config,python,python3
+ -P openssh,openssl,patch,perl,pkg-config
  -P readline,rsync,unzip,emacs,wget,zip,perl-Archive-Zip
+ -P python,python3
 "@
 
 start $setup  "-B -N -n -q -d -D -L -X -s $site -l $temp -R $root $packages" -Wait
