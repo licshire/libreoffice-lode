@@ -104,6 +104,7 @@ name=
 target=
 fetch=
 extra=
+ubsan=
 
 rm -f autogen.input.job
 rm -f autogen.input.job.config
@@ -164,6 +165,9 @@ while [ "${1}" != "" ]; do
         --mode)
             mode="$arg"
             ;;
+        --env)
+            env_file="$arg"
+            ;;
         --config)
             process_config "$arg"
             ;;
@@ -196,9 +200,15 @@ R=0
 
 if [ "$R" = "0" -a "$fetch" != "" ] ; then
     git pull -r || R=1
+    git submodule update
 fi
 
 setup_tempdir
+
+if [ -n "$env_file" ] ; then
+    echo "sourcing  $LODE_HOME/bin/${env_file}"
+    source "$LODE_HOME/bin/${env_file}"
+fi
 
 if [ ! -f Makefile -o Makefile -ot configure.ac ] ; then
     echo "./autogen.sh 2>&1" | tee -a ${build_log}
