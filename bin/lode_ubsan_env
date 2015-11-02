@@ -1,8 +1,8 @@
 export LD_LIBRARY_PATH=$LODE_HOME/opt_private/lib64
-export ASAN_OPTIONS=strip_path_prefix=$(pwd):handle_ioctl=1:detect_leaks=0:allow_user_segv_handler=1:use_sigaltstack=0:detect_deadlocks=1:color=always:intercept_tls_get_addr=1:check_initialization_order=1:detect_stack_use_after_return=1:strict_init_order=1:detect_invalid_pointer_pairs=1
+export ASAN_OPTIONS=strip_path_prefix=$(pwd):handle_ioctl=1:detect_leaks=0:allow_user_segv_handler=1:use_sigaltstack=0:detect_deadlocks=1:intercept_tls_get_addr=1:check_initialization_order=1:detect_stack_use_after_return=1:strict_init_order=1:detect_invalid_pointer_pairs=1
 export LSAN_OPTIONS=suppressions=$(pwd)/leak-suppress.txt:print_suppressions=0:report_objects=1
-export UBSAN_OPTIONS=color=always:print_stacktrace=1
-export CC="$LODE_HOME/opt_private/bin/clang --gcc-toolchain=$LODE_HOME/opt_private -fcolor-diagnostics -fno-sanitize-recover=undefined,integer -fsanitize=address -fsanitize=undefined -fsanitize=local-bounds -fsanitize-blacklist=$(pwd)/sanitize-ubsan-blacklist"
+export UBSAN_OPTIONS=print_stacktrace=1
+export CC="$LODE_HOME/opt_private/bin/clang --gcc-toolchain=$LODE_HOME/opt_private -fno-sanitize-recover=undefined,integer -fsanitize=address -fsanitize=undefined -fsanitize=local-bounds -fsanitize-blacklist=$(pwd)/sanitize-ubsan-blacklist"
 # Clang ignores GCC's __abi_tag__ attribute, causing Clang to generate mangled names for libstdc++ entities that don't match the actual GCC names present in libstdc++, so disable _GLIBCXX_USE_CXX11_ABI for now:
-export CXX="$LODE_HOME/opt_private/bin/clang++ --gcc-toolchain=$LODE_HOME/opt_private -fcolor-diagnostics -fno-sanitize-recover=undefined,integer -fsanitize=address -fsanitize=undefined -fsanitize=local-bounds -fsanitize-blacklist=$(pwd)/sanitize-ubsan-blacklist -D_GLIBCXX_USE_CXX11_ABI=0"
+export CXX="$LODE_HOME/opt_private/bin/clang++ --gcc-toolchain=$LODE_HOME/opt_private -fno-sanitize-recover=undefined,integer -fsanitize=address -fsanitize=undefined -fsanitize=local-bounds -fsanitize-blacklist=$(pwd)/sanitize-ubsan-blacklist -D_GLIBCXX_USE_CXX11_ABI=0"
 export CLANGDIR=$LODE_HOME/opt_private
