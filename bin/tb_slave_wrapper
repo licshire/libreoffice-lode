@@ -203,6 +203,8 @@ if [ "$R" = "0" -a "$fetch" != "" ] ; then
     git submodule update
 fi
 
+sha="$(git rev-parse HEAD)"
+
 setup_tempdir
 
 if [ -n "$env_file" ] ; then
@@ -275,7 +277,7 @@ tinderbox: status: $S
 tinderbox: END
 
 TinderboxPrint: <a title="jenkins build" href="http://ci.libreoffice.org/job/${JOB_NAME}/${BUILD_NUMBER}/">jenkins on $NODE_NAME</a>
-
+TinderboxPrint: <a title="core" href="http://cgit.freedesktop.org/libreoffice/core/log/?id=${sha}">core</a>
 EOF
 
     cat ${build_log} >> build.log
