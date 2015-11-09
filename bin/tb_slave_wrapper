@@ -111,6 +111,8 @@ rm -f autogen.input.job.config
 echo "OS:${OS}"
 echo "pwd:$(pwd)"
 
+ulimit -c unlimited
+
 case "$(uname)" in
     Darwin)
         OS="MacOSX"
