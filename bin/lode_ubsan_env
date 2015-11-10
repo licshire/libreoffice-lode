@@ -7,3 +7,4 @@ export CC="$LODE_HOME/opt_private/bin/clang --gcc-toolchain=$LODE_HOME/opt_priva
 export CXX="$LODE_HOME/opt_private/bin/clang++ --gcc-toolchain=$LODE_HOME/opt_private -fno-sanitize-recover=undefined,integer -fsanitize=address -fsanitize=undefined -fsanitize=local-bounds -fsanitize-blacklist=$(pwd)/sanitize-ubsan-blacklist -D_GLIBCXX_USE_CXX11_ABI=0"
 export CLANGDIR=$LODE_HOME/opt_private
 export ASAN_SYMBOLIZER_PATH="$LODE_HOME/opt_private/bin/llvm-symbolizer"
+export CCACHE_CPP2=YES
