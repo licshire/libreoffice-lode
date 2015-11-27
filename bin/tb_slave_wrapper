@@ -28,8 +28,14 @@ process_distro_config()
 {
     cfg="$1"
     if [ -f "./distro-configs/Jenkins/$cfg" ] ; then
-        cat "./distro-configs/Jenkins/$cfg" > autogen.input.job.config
+        cat "./distro-configs/Jenkins/$cfg" >> autogen.input.job.config
+    elif [ -f "./distro-configs/Jenkins/${cfg}.conf" ] ; then
+        cat "./distro-configs/Jenkins/${cfg}.conf" >> autogen.input.job.config
     fi
+    if [ -f "./distro-configs/Jenkins/${DistroPrefix?}_${cfg}.conf" ] ; then
+        cat "./distro-configs/Jenkins/${DistroPrefix?}_${cfg}.conf" >> autogen.input.job.config
+    fi
+
 }
 
 process_config()
@@ -51,9 +57,15 @@ process_config()
             ;;
         --enable-64-bit)
             adjust_config "--enable-64-bit" "--disable-64-bit"
+            if [ "${OS}" == "Cygwin" ] ; then
+                DistroPrefix="Win64"
+            fi
             ;;
         --disable-64-bit)
             adjust_config "--disable-64-bit" "--enable-64-bit"
+            if [ "${OS}" == "Cygwin" ] ; then
+                DistroPrefix="Win32"
+            fi
             ;;
         --enable-symbols)
             adjust_config "--enable-symbols" "--disable-symbols"
@@ -117,12 +129,15 @@ ulimit -c unlimited
 case "$(uname)" in
     Darwin)
         OS="MacOSX"
+        DistroPrefix="MacOSX"
         ;;
     Linux)
         OS="Linux"
+        DistroPrefix="Linux"
         ;;
     CYGWIN*)
         OS="Cygwin"
+        DistroPrefix="Win32"
         ;;
     *)
         echo "Unsupported OS:$(uname)"
