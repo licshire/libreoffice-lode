@@ -121,6 +121,8 @@ distro_config=
 
 rm -f autogen.input.job
 rm -f autogen.input.job.config
+rm -f core.*
+
 echo "OS:${OS}"
 echo "pwd:$(pwd)"
 
