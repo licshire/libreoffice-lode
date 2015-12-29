@@ -87,9 +87,9 @@ get_remote_file()
         fi
     else
         if [ -n "$f" ] ; then
-            curl -o ${f?} ${url?} || die "Error download ${module?} source package"
+            curl -L -o ${f?} ${url?} || die "Error download ${module?} source package"
         else
-            curl -O ${url?} || die "Error download ${module?} source package"
+            curl -L -O ${url?} || die "Error download ${module?} source package"
         fi
     fi
 }

@@ -11,9 +11,9 @@ get_remote_file()
     local f="$2"
 
     if [ -n "$f" ] ; then
-    curl -O ${url?} -o ${f?} || die "Error download ${module?} source package"
+        curl -L -O ${url?} -o ${f?} || die "Error download ${module?} source package"
     else
-    curl -O ${url?} || die "Error download ${module?} source package"
+        curl -L -O ${url?} || die "Error download ${module?} source package"
     fi
 }
 
