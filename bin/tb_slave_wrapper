@@ -223,6 +223,12 @@ fi
 
 sha="$(git rev-parse HEAD)"
 
+if [ "${mode?}" = "gerrit" ] ; then
+    if [ "${OS?}" = "Linux" ] ; then
+        process_config "--enable-dbgutil"
+    fi
+fi
+
 if [ -n "$distro_config" ] ; then
     process_distro_config "$distro_config"
 fi
