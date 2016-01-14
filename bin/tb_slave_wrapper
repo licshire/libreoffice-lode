@@ -226,6 +226,7 @@ sha="$(git rev-parse HEAD)"
 if [ "${mode?}" = "gerrit" ] ; then
     if [ "${OS?}" = "Linux" ] ; then
         process_config "--enable-dbgutil"
+        target="check"
     fi
 fi
 
