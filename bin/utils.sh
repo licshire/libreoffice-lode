@@ -494,6 +494,7 @@ create_new_work_clone()
 {
 repo="$1"
 
+    test_create_dirs dev
     if [ -e dev/${repo} ] ; then
         die "dev/${repo} already exist"
     else
