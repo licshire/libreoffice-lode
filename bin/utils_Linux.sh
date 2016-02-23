@@ -17,8 +17,17 @@ determine_gstreamer()
 
 install_build_dep()
 {
+local inst
+local version
+
     install_generic_conf_make_install "make" "4.1" "http://mirrors.kernel.org/gnu/make" "make-4.1.tar.gz"
-    install_generic_conf_make_install "doxygen" "1.8.8" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.8.src.tar.gz"
+    inst="$(type -p doxygen)"
+    if [ -n "$inst" ] ; then
+        version="$(doxygen --version)"
+    fi
+    if [ -z "$inst" -o "$(compare_version "$version" "1.8.5")" = "-1" ] ; then
+        install_generic_conf_make_install "doxygen" "1.8.5" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.5.src.tar.gz"
+    fi
     install_ant
     determine_gstreamer
 }
