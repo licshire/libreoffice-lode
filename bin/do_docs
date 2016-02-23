@@ -31,7 +31,7 @@ if test -n "$found" ; then
     echo "need to make docs and deliver them"
     rm -fr docs
     mkdir docs
-    touch ../.docs_published # note even if we fail we do not want to retry too often
+    touch .docs_published # note even if we fail we do not want to retry too often
     make docs
     if [ $? -eq 0 ]; then
         # make was happy le'ts push the new docs
