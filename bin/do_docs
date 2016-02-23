@@ -21,7 +21,13 @@
 #        rm -fr old
 #    fi
 
-if test $(find ".docs_published" -mtime +7 2>/dev/null ); then
+if [ -f .docs_published ] ; then
+    found="$(find ".docs_published" -mtime +7)"
+else
+    found=".doc_published"
+fi
+
+if test -n "$found" ; then
     echo "need to make docs and deliver them"
     rm -fr docs
     mkdir docs
