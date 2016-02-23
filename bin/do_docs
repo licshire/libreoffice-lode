@@ -1,0 +1,42 @@
+#!/bin/bash
+# -*- tab-width : 4; indent-tabs-mode : nil -*-
+#
+#    Copyright (C) 2015 Norbert Thiebaud
+#    License: GPLv3
+#
+
+# the target need to have the following scripts installed in HOME as rotate_docs
+#die()
+#{
+#    echo  "$@"
+#    exit 1;
+#}
+#
+#cd /var/www/sites/docs.libreoffice.org || die "can't cd to /var/www/sites/docs.libreoffice.org"
+#if [ -d new ] ; then
+#    if [ -d current ] ;then
+#        mv current old
+#    fi
+#        mv new current
+#        rm -fr old
+#    fi
+
+if test $(find ".docs_published" -mtime +7 2>/dev/null ); then
+    echo "need to make docs and deliver them"
+    rm -fr docs
+    mkdir docs
+    touch ../.docs_published # note even if we fail we do not want to retry too often
+    make docs
+    if [ $? -eq 0 ]; then
+        # make was happy le'ts push the new docs
+        pushd docs > /dev/null
+        rsync -a ./ tdf_bot@kermit.documentfoundation.org:/var/www/sites/docs.libreoffice.org/new
+        if [ $? -eq 0 ]; then
+            ssh tdf_bot@kermit.documentfoundation.org ./rotate_docs
+        fi
+        popd > /dev/null
+    fi
+else
+    echo "docs have be generated recently enough.. skipping"
+fi
+

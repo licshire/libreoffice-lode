@@ -176,6 +176,11 @@ while [ "${1}" != "" ]; do
         --check)
             target="check"
             ;;
+        --docs)
+            if [[ "${NODE_LABELS}" == *"Docs"* ]] ; then
+                extra="do_docs"
+            fi
+            ;;
         --perfsuite)
             extra="do_perfsuite"
             ;;
