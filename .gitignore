@@ -3,6 +3,7 @@ adm/
 ext_tar/
 packages/
 opt/
+opt_private/
 tb/
 jenkins/
 rel/
