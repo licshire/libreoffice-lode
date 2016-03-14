@@ -266,9 +266,13 @@ fetch_and_unpack_package()
 install_generic_conf_make_install()
 {
     local module="$1"
-    local version="$2"
-    local base_url="$3"
-    local fn="$4"
+    shift
+    local version="$1"
+    shift
+    local base_url="$1"
+    shift
+    local fn="$1"
+    shift
 
     if [ -z "${module}" -o -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
         die "Mssing/Invalid parameter to install_generic_conf_make_install()"
@@ -278,7 +282,12 @@ install_generic_conf_make_install()
         fetch_and_unpack_package "${module?}" "${version?}" "${base_url?}" "$fn"
         pushd "${BASE_DIR?}/packages/${module?}-${version?}" > /dev/null || die "Error cd-ing to ${module} source tree"
         touch .lode_building
-        ./configure --prefix="${BASE_DIR?}/opt" || die "Error configuring ${module?}"
+        while [ "${1}" != "" ] ; do
+            patch -p 1 < "${BASE_DIR?}/patches/${1}" || die "Error patching with $1"
+            shift
+        done
+
+        ./configure --prefix "${BASE_DIR?}/opt" || die "Error configuring ${module?}"
         make || die "error building ${module?}"
         make install || die "error installing ${module?}"
         rm .lode_building
@@ -319,8 +328,11 @@ install_doxygen()
 {
     local module="doxygen"
     local version="$1"
-    local base_url="$2"
-    local fn="$3"
+    shift
+    local base_url="$1"
+    shift
+    local fn="$1"
+    shift
 
     if [ -z "${version}" -o -z "${base_url}" -o -z "${fn}" ] ; then
         die "Mssing/Invalid parameter to install_private_cmake()"
@@ -330,6 +342,11 @@ install_doxygen()
         fetch_and_unpack_package "${module?}" "${version?}" "${base_url?}" "$fn"
         pushd "${BASE_DIR?}/packages/${module?}-${version?}" > /dev/null || die "cd-ing to cmake source directory"
         touch .lode_building
+        while [ "${1}" != "" ] ; do
+            patch -p 1 < "${BASE_DIR?}/patches/${1}" || die "Error patching with $1"
+            shift
+        done
+
         "${BASE_DIR?}/opt/lode_private/bin/cmake" -G "Unix Makefiles" -Denglish_only=YES -DCMAKE_INSTALL_PREFIX="${BASE_DIR?}/opt" || die "Error preparing make for doxygen"
         make -j $(sysctl -n hw.ncpu) || die "error making doxygen"
         make install || die "Errror installing ${module}"
