@@ -30,10 +30,11 @@ if test -z "$found" ; then
     echo "need to make docs and deliver them"
     rm -fr docs
     mkdir docs
+    base_dir=$(pwd)
+    nb_cpu=$(nproc)
     touch .docs_published # note even if we fail we do not want to retry too often
     pushd docs > /dev/null
-    nb_cpu=$(nproc)
-    make -f $(pwd)/solenv/bin/mkdocs.Makefile -j ${nb_cpu}
+    make -f ${base_dir}/solenv/bin/mkdocs.Makefile -j ${nb_cpu}
     if [ $? -eq 0 ]; then
         # make was happy le'ts push the new docs
         rsync -a ./ tdf_bot@kermit.documentfoundation.org:/var/www/sites/docs.libreoffice.org/new
