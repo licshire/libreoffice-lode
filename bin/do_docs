@@ -31,16 +31,17 @@ if test -z "$found" ; then
     rm -fr docs
     mkdir docs
     touch .docs_published # note even if we fail we do not want to retry too often
-    make docs
+    pushd docs > /dev/null
+    nb_cpu=$(nproc)
+    make -f $(pwd)/solenv/bin/mkdocs.Makefile -j ${nb_cpu}
     if [ $? -eq 0 ]; then
         # make was happy le'ts push the new docs
-        pushd docs > /dev/null
         rsync -a ./ tdf_bot@kermit.documentfoundation.org:/var/www/sites/docs.libreoffice.org/new
         if [ $? -eq 0 ]; then
             ssh tdf_bot@kermit.documentfoundation.org ./rotate_docs
         fi
-        popd > /dev/null
     fi
+    popd > /dev/null
 else
     echo "docs have be generated recently enough.. skipping"
 fi
