@@ -5,22 +5,6 @@
 #    License: GPLv3
 #
 
-# the target need to have the following scripts installed in HOME as rotate_docs
-#die()
-#{
-#    echo  "$@"
-#    exit 1;
-#}
-#
-#cd /var/www/sites/docs.libreoffice.org || die "can't cd to /var/www/sites/docs.libreoffice.org"
-#if [ -d new ] ; then
-#    if [ -d current ] ;then
-#        mv current old
-#    fi
-#        mv new current
-#        rm -fr old
-#    fi
-
 found=
 if [ -f .docs_published ] ; then
     found="$(find ".docs_published" -mtime -7)"
@@ -30,19 +14,16 @@ if test -z "$found" ; then
     echo "need to make docs and deliver them"
     rm -fr docs
     mkdir docs
-    base_dir=$(pwd)
     nb_cpu=$(nproc)
     touch .docs_published # note even if we fail we do not want to retry too often
-    pushd docs > /dev/null
-    make -f ${base_dir}/solenv/bin/mkdocs.Makefile -j ${nb_cpu}
+    make -f ./solenv/bin/mkdocs.Makefile -j ${nb_cpu}
     if [ $? -eq 0 ]; then
         # make was happy le'ts push the new docs
-        rsync -a ./ tdf_bot@kermit.documentfoundation.org:/var/www/sites/docs.libreoffice.org/new
+        rsync -a docs/ tdf_bot@kermit.documentfoundation.org:/var/www/sites/docs.libreoffice.org/new
         if [ $? -eq 0 ]; then
             ssh tdf_bot@kermit.documentfoundation.org ./rotate_docs
         fi
     fi
-    popd > /dev/null
 else
     echo "docs have be generated recently enough.. skipping"
 fi
