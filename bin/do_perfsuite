@@ -17,10 +17,18 @@ popd > /dev/null
 echo "make perfcheck"
 make perfcheck
 
-if [ $? -eq 0 ] ; then
+local rc=$?
+if [ $rc -eq 0 ] ; then
     # collect the unitest perf data
     ${LODE_HOME}/adm/perfdbmgr/bin/perfcheck_scrubber
 fi
+
 #run all the suites
 
 ${LODE_HOME}/adm/perfdbmgr/bin/loperf_suite --sha=$(git rev-parse HEAD) --refresh --exe=$(pwd)/instdir/program/soffice.bin $LODE_HOME/adm/test-files/loperf_suites/*_suite.cfg
+rc2=$?
+
+if [ $rc -eq 0 ] ; then
+    rc=$rc2
+fi
+exit $rc
