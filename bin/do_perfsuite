@@ -17,7 +17,7 @@ popd > /dev/null
 echo "make perfcheck"
 make perfcheck
 
-local rc=$?
+rc=$?
 if [ $rc -eq 0 ] ; then
     # collect the unitest perf data
     ${LODE_HOME}/adm/perfdbmgr/bin/perfcheck_scrubber
