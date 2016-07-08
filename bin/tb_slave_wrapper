@@ -91,6 +91,7 @@ final_config()
     fi
 }
 
+
 setup_tempdir()
 {
     rm -fr tempdir
@@ -232,6 +233,12 @@ if [ "${mode?}" = "gerrit" ] ; then
     if [ "${OS?}" = "Linux" ] ; then
         process_config "--enable-dbgutil"
         target="check"
+    fi
+elif [ "${mode?}" = "config" ] ; then
+    echo "config mode : $Config"
+    process_distro_config "$Config"
+    if [ -f "$LODE_HOME/bin/${Config}.env" ] ; then
+        source "$LODE_HOME/bin/${Config}.env"
     fi
 fi
 
