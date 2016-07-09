@@ -15,6 +15,31 @@ determine_gstreamer()
     fi
 }
 
+install_private_clang()
+{
+clang_version="$1"
+
+    if [ ! -x "${BASE_DIR?}/opt_private/clang-${clang_version}/bin/clang" -o -f "${BASE_DIR?}/packages/llvm-${clang_version}.src/.lode_building" -o ! -d "${BASE_DIR?}/packages/llvm-${clang_version}.src" ]; then
+        rm -fr ${BASE_DIR?}/packages/llvm-${clang_version}*
+        pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
+        curl -L -O http://llvm.org/releases/${clang_version}/llvm-${clang_version}.src.tar.xz || die "Error downloading llvm source"
+        tar -xf "llvm-${clang_version}.src.tar.xz" || die "Error untaring llvm source"
+        touch "${BASE_DIR?}/packages/llvm-${clang_version}.src/.lode_building"
+        curl -L -O "http://llvm.org/releases/${clang_version}/cfe-${clang_version}.src.tar.xz" || die "Error downloading clang source"
+        tar -xf "cfe-${clang_version}.src.tar.xz" -C "llvm-${clang_version}.src/tools" || die "Error untaring clang source"
+        mv "llvm-${clang_version}.src/tools/cfe-${clang_version}.src" "llvm-${clang_version}.src/tools/clang" || die "Error ranming clang source directory"
+        rm -fr llvmbuild
+        mkdir llvmbuild || die "Error creating the llvm build directory"
+        pushd "${BASE_DIR?}/packages/llvmbuild" || die "Error switching to ${BASE_DIR?}/packages/llvmbuild"
+        ${BASE_DIR?}/opt/lode_private/bin/cmake -DCMAKE_INSTALL_PREFIX=${BASE_DIR?}/opt_private/clang-${clang_version} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD="host" ../llvm-${clang_version}.src || die "Error configuring llvm"
+        make -j $(getconf _NPROCESSORS_ONLN) || die "Error building llvm"
+        make install || die "Error installing llvm"
+        rm "${BASE_DIR?}/packages/llvm-${clang_version}.src/.lode_building"
+        popd > /dev/null
+        popd > /dev/null
+    fi
+}
+
 install_build_dep()
 {
 local inst
@@ -39,6 +64,17 @@ local version
         if [ ! -x "${BASE_DIR?}/opt/bin/doxygen" ] ; then
             ln -s "$inst" "${BASE_DIR?}/opt/bin/doxygen"
         fi
+    fi
+    if [ "$DO_JENKINS" = "1" ] ; then
+        version=
+        inst="$(type -p cmake)"
+        if [ -n "$inst" ] ; then
+            version="$(cmake --version | sed -e "s/.* //")"
+        fi
+        if [ -z "$inst" -o "$(compare_version "$version" "3.3.1")" = "-1" ] ; then
+            install_private_cmake "3.3.1" "http://www.cmake.org/files/v3.3/" "cmake-3.3.1.tar.gz"
+        fi
+        install_private_clang "3.8.0"
     fi
     install_ant
     determine_gstreamer

@@ -315,7 +315,7 @@ install_private_cmake()
         pushd "${BASE_DIR?}/packages/${module?}-${version?}" > /dev/null || die "cd-ing to cmake source directory"
         touch .lode_building
         ./bootstrap --prefix="${BASE_DIR?}/opt/lode_private" --parallel=$(sysctl -n hw.ncpu) || die "bootstraping cmake"
-        make -j $(sysctl -n hw.ncpu) || die "Error making ${module}"
+        make -j $(getconf _NPROCESSORS_ONLN) || die "Error making ${module}"
         make install || die "Errror installing ${module}"
         rm .lode_building
         popd > /dev/null
@@ -348,7 +348,7 @@ install_doxygen()
         done
 
         "${BASE_DIR?}/opt/lode_private/bin/cmake" -G "Unix Makefiles" -Denglish_only=YES -DCMAKE_INSTALL_PREFIX="${BASE_DIR?}/opt" || die "Error preparing make for doxygen"
-        make -j $(sysctl -n hw.ncpu) || die "error making doxygen"
+        make -j $(getconf _NPROCESSORS_ONLN) || die "error making doxygen"
         make install || die "Errror installing ${module}"
         rm .lode_building
         popd > /dev/null
