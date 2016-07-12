@@ -245,7 +245,6 @@ elif [ "${mode?}" = "config" ] ; then
         # temporary work around until master caugh up and all pending gerrit patch too
         if [ "${OS?}" = "Linux" -o "${OS?}" = "MacOSX" ] ; then
             process_config "--enable-dbgutil"
-            target="check"
         fi
     fi
 fi
