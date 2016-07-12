@@ -74,6 +74,7 @@ local version
         if [ -z "$inst" -o "$(compare_version "$version" "3.3.1")" = "-1" ] ; then
             install_private_cmake "3.3.1" "http://www.cmake.org/files/v3.3/" "cmake-3.3.1.tar.gz"
         fi
+        install_generic_conf_make_install "ccache" "3.2.5" "https://www.samba.org/ftp/ccache" "ccache-3.2.5.tar.xz"
         install_private_clang "3.8.0"
     fi
     install_ant
