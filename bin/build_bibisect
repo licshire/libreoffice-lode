@@ -193,24 +193,30 @@ build()
 add_bibisect_Darwin()
 {
     echo -n "Adding $sha ..."
-	dmg=$(ls -1 ${SOURCE_GIT_REPO?}/workdir/installation/LibreOffice_Dev/dmg/install/en-US/*.dmg)
-
-    if [ -z "$dmg" -o ! -f $dmg ] ; then
+    if [ -d ${SOURCE_GIT_REPO?}/workdir/installation/LibreOfficeDev/ ] ; then
+	    dmg=$(ls -1 ${SOURCE_GIT_REPO?}/workdir/installation/LibreOfficeDev/dmg/install/en-US/*.dmg 2>/dev/null)
+        app=LibreOfficeDev
+    elif [ -d ${SOURCE_GIT_REPO?}/workdir/installation/LibreOffice/ ] ; then
+	    dmg=$(ls -1 ${SOURCE_GIT_REPO?}/workdir/installation/LibreOffice/dmg/install/en-US/*.dmg 2>/dev/null)
+        app=LibreOffice
+    else
         die "weird no dmg"
     fi
+    if [ -z "$dmg" -o ! -f "$dmg" ] ; then
+        die "weird no dmg"
+    fi
+
 	hdiutil attach -nobrowse "${dmg?}" > /dev/null || die "opening dmg $dmg"
-    pushd /Volumes/LibreOfficeDev > /dev/null || die "can't cd to mounted volume"
+    pushd /Volumes/${app?} > /dev/null || die "can't cd to mounted volume"
     rm -fr "${TARGET_GIT_REPO?}/LibreOffice.app"
-    if [ -d LibreOffice.app ] ; then
-        cp -a LibreOffice.app ${TARGET_GIT_REPO?}/.
-    elif [ -d LibreOfficeDev.app ] ; then
-        cp -a LibreOfficeDev.app ${TARGET_GIT_REPO?}/LibreOffice.app
+    if [ -d ${app?}.app ] ; then
+        cp -a ${app?}.app ${TARGET_GIT_REPO?}/LibreOffice.app
     else
         die "No LibreOffice.app found to copy"
     fi
     popd > /dev/null
     sleep 1
-	hdiutil detach /Volumes/LibreOfficeDev > /dev/null 2>&1 || die "error detaching the volume"
+	hdiutil detach /Volumes/${app?} > /dev/null 2>&1 || die "error detaching the volume"
 
     pushd "${TARGET_GIT_REPO?}" > /dev/null
     git add -A LibreOffice.app
