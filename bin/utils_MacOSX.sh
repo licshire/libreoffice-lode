@@ -27,6 +27,7 @@ http://support.apple.com/downloads/DL1572/en_US/JavaForOSX2014-001.dmg
 EOF
 }
 
+#Temporary fix for macOS 10.12 Sierra with his 16.* kernel. Seems to work on all machines.
 determine_os_flavor()
 {
     kernel=$(uname -r)
@@ -39,6 +40,9 @@ determine_os_flavor()
         OS_FLAVOR=10.10
         ;;
     15.*)
+        OS_FLAVOR=10.11
+        ;;
+    16.*)
         OS_FLAVOR=10.11
         ;;
     *)
