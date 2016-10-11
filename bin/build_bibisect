@@ -269,6 +269,36 @@ EOF
 
 }
 
+add_bibisect_Linux()
+{
+    echo -n "Adding $sha ..."
+    rm -fr "${TARGET_GIT_REPO?}/instdir"
+    cp -r "${SOURCE_GIT_REPO?}/instdir" "${TARGET_GIT_REPO?}/."
+
+    pushd "${TARGET_GIT_REPO?}" > /dev/null
+    git add -A instdir
+
+    pushd "${SOURCE_GIT_REPO?}" > /dev/null
+    cat <<EOF > commit.msgs
+source sha:${sha?}
+
+$(git log --pretty="format:source sha:%H" ${last_done_sha?}..${sha?})
+EOF
+
+    popd > /dev/null
+    echo -n " committing"
+    git commit -q -F "${SOURCE_GIT_REPO?}/commit.msgs" || die "error committing $sha"
+    last_done_sha="${sha?}"
+    rm "${SOURCE_GIT_REPO?}/commit.msgs"
+    popd > /dev/null
+    echo "$sha good" >> "${METADATA_DIR}/commit_list.done.pushed"
+    echo "$sha" > "${METADATA_DIR?}/resume_sha"
+
+    echo " Committed"
+
+}
+
+EOF
 if [ -z "$LODE_HOME" ] ; then
     die "LODE_HOME not set"
 fi
