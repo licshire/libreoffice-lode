@@ -171,6 +171,11 @@ while [ "${1}" != "" ]; do
         --clean)
             clean=1
             ;;
+        --elf)
+            if [ "$OS" = "Linux" ] ; then
+                extra="$extra elf-check"
+            fi
+            ;;
         --name)
             name="$arg"
             ;;
@@ -179,11 +184,11 @@ while [ "${1}" != "" ]; do
             ;;
         --docs)
             if [[ "${NODE_LABELS}" == *"Docs"* ]] ; then
-                extra="do_docs"
+                extra="$extra do_docs"
             fi
             ;;
         --perfsuite)
-            extra="do_perfsuite"
+            extra="$extra do_perfsuite"
             ;;
         --fetch)
             fetch="$arg"
