@@ -7,7 +7,7 @@
 
 install_pre_build_native_make()
 {
-    local make_exe_file="make-85047eb-msvc.exe"
+    local make_exe_file="make-4.2.1-msvc.exe"
 
     if [ ! -f "${BASE_DIR?}/packages/${make_exe_file?}" -o ! -x "${BASE_DIR?}/opt/bin/make" ] ; then
         test_create_dirs "${BASE_DIR?}/opt/bin"
