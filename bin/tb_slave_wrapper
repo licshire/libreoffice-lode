@@ -299,7 +299,7 @@ fi
 
 for e in $extra ; do
     if [ "$R" = "0" ] ; then
-        $LODE_HOME/bin/$extra 2>&1 | tee -a ${build_log}
+        $LODE_HOME/bin/${e} 2>&1 | tee -a ${build_log}
         R=${PIPESTATUS[0]}
     fi
 done
