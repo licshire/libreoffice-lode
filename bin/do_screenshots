@@ -6,25 +6,21 @@
 #
 
 # Cleanup
-rm -rf workdir/screenshots
 rm -rf workdir/screenshots-zip
-
-# Generate screenshots in each built language
-languages=$(cat config_host_lang.mk | grep WITH_LANG_LIST | sed -e "s/.*=//")
-for lang in $languages; do
-    echo "Screenshots for locale: $language"
-    LO_TEST_LOCALE=$lang make screenshot
-done
 
 # Create one zip file per language (for uploading)
 mkdir workdir/screenshots-zip
 if [ -d workdir/screenshots ] ; do
     pushd workdir/screenshots
     for folder in $(ls); do
-        zip -r "../screenshots-zip/${folder}".zip "$folder"
+        if [ -d "$folder" ] ; then
+            zip -r "../screenshots-zip/${folder}".zip "$folder"
+        else
+            echo "No screenshot for $folder" >&2
+        fi
     done
     popd > /dev/null
 else
-    echo "no screenshots generated"
+    echo "No screenshots generated" >&2
     exit 1
 fi

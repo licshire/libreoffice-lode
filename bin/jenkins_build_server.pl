@@ -62,7 +62,7 @@ sub processit
                 if(chdir $wd)
                 {
                     chomp $cmd;
-                    if( "$cmd" eq "make" || "$cmd" eq "make check")
+                    if( "$cmd" eq "make" || "$cmd" eq "make check" || "$cmd" eq "make screenshot")
                     {
                         $pid = open(RESULT, "-|");
                         if($pid)
@@ -87,6 +87,10 @@ sub processit
                             if( "$cmd" eq "make check")
                             {
                                 exec "make", "-f", "C:/cygwin/$ENV{LODE_HOME}/bin/cygwrapper.Makefile", "check" || die "can't exec";
+                            }
+                            elsif( "$cmd" eq "make screenshot")
+                            {
+                                exec "make", "-f", "C:/cygwin/$ENV{LODE_HOME}/bin/cygwrapper.Makefile", "screenshot" || die "can't exec";
                             }
                             else
                             {
