@@ -10,11 +10,12 @@ rm -rf workdir/screenshots-zip
 
 # Create one zip file per language (for uploading)
 mkdir workdir/screenshots-zip
-if [ -d workdir/screenshots ] ; do
+if [ -d workdir/screenshots ] ; then
     pushd workdir/screenshots
     for folder in $(ls); do
         if [ -d "$folder" ] ; then
-            zip -r "../screenshots-zip/${folder}".zip "$folder"
+            echo "[ZIP] Screenshot for $folder" >&2
+            zip -q -r "../screenshots-zip/${folder}".zip "$folder"
         else
             echo "No screenshot for $folder" >&2
         fi
