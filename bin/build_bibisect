@@ -298,7 +298,6 @@ EOF
 
 }
 
-EOF
 if [ -z "$LODE_HOME" ] ; then
     die "LODE_HOME not set"
 fi
