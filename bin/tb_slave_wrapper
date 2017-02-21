@@ -278,6 +278,9 @@ if [ ! -f Makefile -o Makefile -ot configure.ac ] ; then
 
     if [ "$R" = "0" ] ; then
         touch config_host.mk
+    elif [ "$mode" = "configcheck" ] ; then
+        restore_tempdir
+        exit 0
     fi
 fi
 if [ "$R" = "0" -a -f .clean_slave ] ; then
