@@ -7,6 +7,9 @@
 #
 # Display an error message and exit
 #
+
+FETCHER=wget
+
 die()
 {
     echo  "$@"
@@ -110,8 +113,7 @@ get_remote_file()
 {
     local url="$1"
     local f="$2"
-    which wget > /dev/null 2> /dev/null
-    if [ "$?" = "0" ] ; then
+    if [ $FETCHER = "wget" ] ; then
         if [ -n "$f" ] ; then
             wget -O ${f?} ${url?} || die "Error download ${module?} source package"
         else
@@ -387,8 +389,7 @@ install_junit()
         echo "junit Already Installed" 1>&2
     else
         test_create_dirs "${BASE_DIR?}/opt/share" "${BASE_DIR?}/opt/share/java"
-        which wget > /dev/null 2> /dev/null
-        if [ "$?" = "0" ] ; then
+        if [ $FETCHER = "wget" ] ; then
             wget -O "${BASE_DIR?}/opt/share/java/junit.jar" http://downloads.sourceforge.net/project/junit/junit/4.10/junit-4.10.jar || die "Error wgetting junit"
         else
             curl -o "${BASE_DIR?}/opt/share/java/junit.jar" -O#L "https://github.com/downloads/junit-team/junit/junit-4.11.jar" || die "Error downloading junit"

@@ -4,6 +4,7 @@
 #    License: GPLv3
 #
 
+FETCHER=curl
 
 get_remote_file()
 {
