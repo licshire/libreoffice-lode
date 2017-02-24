@@ -271,7 +271,7 @@ if [ -n "$env_file" ] ; then
     source "$LODE_HOME/bin/${env_file}"
 fi
 
-if [ ! -f Makefile -o Makefile -ot configure.ac ] ; then
+if [ ! -f Makefile -o Makefile -ot configure.ac -o "$mode" = "configcheck" ] ; then
     echo "./autogen.sh 2>&1" | tee -a ${build_log}
     ./autogen.sh 2>&1 | tee -a ${build_log}
     R=${PIPESTATUS[0]}
