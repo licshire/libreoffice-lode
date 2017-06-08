@@ -5,6 +5,7 @@
 #    License: GPLv3
 #
 
+ref="$1"
 do_repo()
 {
     base="$1"
@@ -14,6 +15,10 @@ do_repo()
             pushd ${repo}
             if [ -f ${repo}/Repository.mk ] ; then
                 echo "${LODE_HOME}/mirrors/core.git/object" > .git/objects/info/alternate
+            fi
+            if [ -n "$ref" ] ; then
+                echo "remove ref ref/changes/$ref"
+                git update-ref -d "ref/changes/$ref"
             fi
             git gc
             if [ -f Makefile ] ; then
@@ -30,6 +35,7 @@ do_repo()
 pushd ${LODE_HOME}/mirrors/core.git
 git remote update
 popd
+
 
 do_repo "${LODE_HOME}/jenkins/workspace"
 
