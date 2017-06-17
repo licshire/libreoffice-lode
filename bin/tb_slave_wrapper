@@ -185,6 +185,9 @@ while [ "${1}" != "" ]; do
         --check)
             target="check"
             ;;
+        --updater)
+            extra="do_updater $extra"
+            ;;
         --screenshots)
             extra="do_screenshots $extra"
             target="screenshot"
