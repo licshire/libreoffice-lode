@@ -14,4 +14,4 @@ ssh upload "rm $UPLOAD_DIR../current || true"
 ssh upload "ln -s $UPLOAD_DIR $UPLOAD_DIR../current"
 scp workdir/installation/LibreOfficeDev/archive/install/en-US/*.tar.gz upload:$UPLOAD_DIR.
 scp workdir/installation/LibreOfficeDev_languagepack/archive/install/*/*.tar.gz upload:$UPLOAD_DIR.
-ssh upload "rm $UPLOAD_DIR/*en-US.tar.gz
+ssh upload "rm $UPLOAD_DIR/*en-US.tar.gz"
