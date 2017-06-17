@@ -10,7 +10,7 @@ GIT_ID=$(git log -1 --format=%H)
 TIME=$(date +%Y-%m-%d_%H.%M.%S)
 UPLOAD_DIR=/srv/www/dev-builds.libreoffice.org/daily/master/Linux-archive-x86_64@80-updater/$TIME/
 ssh upload "mkdir -p $UPLOAD_DIR"
-ssh upload "rm $(UPLOAD_DIR)../current || true"
+ssh upload "rm $UPLOAD_DIR../current || true"
 ssh upload "ln -s $UPLOAD_DIR $UPLOAD_DIR../current"
 scp workdir/installation/LibreOfficeDev/archive/install/en-US/*.tar.gz upload:$UPLOAD_DIR.
 scp workdir/installation/LibreOfficeDev_languagepack/archive/install/*/*.tar.gz upload:$UPLOAD_DIR.
