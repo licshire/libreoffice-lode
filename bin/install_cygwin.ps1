@@ -20,15 +20,19 @@ if(!(Test-Path -Path $lode\packages\temp ))
 }
 
 # the external nss module does not play well with cygwin 64
-if([environment]::Is64BitOperatingSystem)
+if($env:PROCESSOR_ARCHITECTURE -eq "AMD64")
 {
 	$setup = "$lode\packages\setup-x86_64.exe"
 	$url = "https://cygwin.com/setup-x86_64.exe"
 }
-else
+elseif($env:PROCESSOR_ARCHITECTURE -eq "x86")
 {
 	$setup = "$lode\packages\setup-x86.exe"
 	$url = "https://cygwin.com/setup-x86.exe"
+}
+else
+{
+	throw "No idea what architecture I'm running on"
 }
 
 if(!(Test-Path -Path $setup ))
