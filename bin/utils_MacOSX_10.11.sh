@@ -16,7 +16,7 @@ install_build_dep()
     # https://gitlab.kitware.com/cmake/cmake/issues/17101
     install_private_cmake "3.10.0-rc3" "http://www.cmake.org/files/v3.10/" "cmake-3.10.0-rc3.tar.gz"
     install_doxygen "1.8.10" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.10.src.tar.gz"
-    install_generic_conf_make_install "ccache" "3.1.9" "https://www.samba.org/ftp/ccache" "ccache-3.1.9.tar.gz"
+    install_generic_conf_make_install "ccache" "3.3.4" "https://www.samba.org/ftp/ccache" "ccache-3.3.4.tar.gz"
     install_generic_conf_make_install "gettext" "0.19.8" "http://ftp.gnu.org/pub/gnu/gettext" "gettext-0.19.8.tar.gz"
 }
 
