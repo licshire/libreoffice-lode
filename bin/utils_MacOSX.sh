@@ -46,6 +46,9 @@ determine_os_flavor()
     16.*)
         OS_FLAVOR=10.11
         ;;
+    17.*)
+        OS_FLAVOR=10.11
+        ;;
     *)
         die "Unknown Darwin kernel version ${kernel}"
         ;;
