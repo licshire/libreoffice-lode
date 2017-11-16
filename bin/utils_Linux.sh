@@ -40,6 +40,19 @@ clang_version="$1"
     fi
 }
 
+install_clang_format()
+{
+clang_format_version="$1"
+
+    if [ ! -x "${BASE_DIR?}/opt/bin/clang-format" ]; then
+        pushd "${BASE_DIR?}/packages" > /dev/null || die "Error switching to ${BASE_DIR?}/packages"
+        curl -L -O "http://dev-www.libreoffice.org/bin/clang-format-${clang_format_version}-linux64" || die "Error downloading clang format"
+        mv "clang-format-${clang_format_version}-linux64" "${BASE_DIR?}/opt/bin/clang-format" || die "Error renaming clang-format"
+        chmod +x "${BASE_DIR?}/opt/bin/clang-format" || die "Error marking clang-format as executable"
+        popd > /dev/null
+    fi
+}
+
 install_build_dep()
 {
 local inst
@@ -75,6 +88,7 @@ local version
             install_private_cmake "3.3.1" "http://www.cmake.org/files/v3.3/" "cmake-3.3.1.tar.gz"
         fi
         install_generic_conf_make_install "ccache" "3.2.5" "https://www.samba.org/ftp/ccache" "ccache-3.2.5.tar.xz"
+        install_clang_format "5.0.0"
         install_private_clang "3.8.0"
     fi
     install_ant
