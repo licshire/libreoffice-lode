@@ -31,7 +31,11 @@ clang_version="$1"
         rm -fr llvmbuild
         mkdir llvmbuild || die "Error creating the llvm build directory"
         pushd "${BASE_DIR?}/packages/llvmbuild" || die "Error switching to ${BASE_DIR?}/packages/llvmbuild"
-        ${BASE_DIR?}/opt/lode_private/bin/cmake -DCMAKE_INSTALL_PREFIX=${BASE_DIR?}/opt_private/clang-${clang_version} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD="host" ../llvm-${clang_version}.src || die "Error configuring llvm"
+        cmake="cmake"
+        if [ -x "${BASE_DIR?}/opt/lode_private/bin/cmake" ]; then
+            cmake="${BASE_DIR?}/opt/lode_private/bin/cmake"
+        fi
+        $cmake -DCMAKE_INSTALL_PREFIX=${BASE_DIR?}/opt_private/clang-${clang_version} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD="host" ../llvm-${clang_version}.src || die "Error configuring llvm"
         make -j $(getconf _NPROCESSORS_ONLN) || die "Error building llvm"
         make install || die "Error installing llvm"
         rm "${BASE_DIR?}/packages/llvm-${clang_version}.src/.lode_building"
