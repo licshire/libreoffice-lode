@@ -76,7 +76,7 @@ local version
         if [ -z "$inst" -o "$(compare_version "$version" "3.3.1")" = "-1" ] ; then
             install_private_cmake "3.3.1" "http://www.cmake.org/files/v3.3/" "cmake-3.3.1.tar.gz"
         fi
-        install_doxygen "1.8.10" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.10.src.tar.gz"
+        # install_doxygen "1.8.10" "http://ftp.stack.nl/pub/users/dimitri" "doxygen-1.8.10.src.tar.gz"
     else
         if [ ! -x "${BASE_DIR?}/opt/bin/doxygen" ] ; then
             ln -s "$inst" "${BASE_DIR?}/opt/bin/doxygen"
