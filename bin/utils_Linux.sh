@@ -54,6 +54,8 @@ clang_format_version="$1"
         mv "clang-format-${clang_format_version}-linux64" "${BASE_DIR?}/opt/bin/clang-format" || die "Error renaming clang-format"
         chmod +x "${BASE_DIR?}/opt/bin/clang-format" || die "Error marking clang-format as executable"
         popd > /dev/null
+    else
+        echo "clang-format already installed" 1>&2
     fi
 }
 
