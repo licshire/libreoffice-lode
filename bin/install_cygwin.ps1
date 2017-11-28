@@ -44,7 +44,7 @@ if(!(Test-Path -Path $setup ))
 start $setup  "-B -n -N -q -d -D -L -X -s $site -l $temp -R $root" -Wait
 
 $packages = @"
- -P autoconf,automake,bison,cabextract,doxygen,flex,gcc-g++
+ -P autoconf,automake,bison,cabextract,doxygen,flex
  -P gettext-devel,git,gnupg,gperf,libxml2-devel
  -P libpng12-devel,make,mintty,openssh,openssl,patch,perl
  -P pkg-config,readline,rsync,unzip,emacs,wget,zip
