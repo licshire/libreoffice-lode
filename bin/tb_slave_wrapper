@@ -29,11 +29,15 @@ process_distro_config()
     cfg="$1"
     if [ -f "./distro-configs/Jenkins/$cfg" ] ; then
         cat "./distro-configs/Jenkins/$cfg" >> autogen.input.job.config
+        printf 'Taking configuration values from %s\n' "./distro-configs/Jenkins/$cfg"
     elif [ -f "./distro-configs/Jenkins/${cfg}.conf" ] ; then
         cat "./distro-configs/Jenkins/${cfg}.conf" >> autogen.input.job.config
+        printf 'Taking configuration values from %s\n' "./distro-configs/Jenkins/${cfg}.conf"
     fi
     if [ -f "./distro-configs/Jenkins/${DistroPrefix?}_${cfg}.conf" ] ; then
         cat "./distro-configs/Jenkins/${DistroPrefix?}_${cfg}.conf" >> autogen.input.job.config
+        printf 'Taking configuration values from %s\n' \
+            "./distro-configs/Jenkins/${DistroPrefix?}_${cfg}.conf"
     fi
 
 }
