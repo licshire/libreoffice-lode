@@ -200,10 +200,10 @@ add_bibisect_Darwin()
 	    dmg=$(ls -1 ${SOURCE_GIT_REPO?}/workdir/installation/LibreOffice/dmg/install/en-US/*.dmg 2>/dev/null)
         app=LibreOffice
     else
-        die "weird no dmg"
+        die "weird no dmg. Did you used --with-package-format=dmg?"
     fi
     if [ -z "$dmg" -o ! -f "$dmg" ] ; then
-        die "weird no dmg"
+        die "weird no dmg. Did you used --with-package-format=dmg?"
     fi
 
 	hdiutil attach -nobrowse "${dmg?}" > /dev/null || die "opening dmg $dmg"
