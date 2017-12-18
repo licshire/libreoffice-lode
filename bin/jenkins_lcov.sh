@@ -30,7 +30,7 @@ lcov_cleanup()
 
 source_build()
 {
-    ./autogen.sh --enable-debug --enable-python=internal --disable-online-update --without-system-libs --with-system-nss --without-system-headers --disable-ccache --disable-coinmp --disable-firebird-sdbc \
+    ./autogen.sh --disable-gtk3 --enable-debug --enable-python=internal --disable-online-update --without-system-libs --with-system-nss --without-system-headers --disable-ccache --disable-coinmp --disable-firebird-sdbc \
     || die "autogen.sh failed."
 
     make clean
