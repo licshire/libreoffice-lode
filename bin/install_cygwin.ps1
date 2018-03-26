@@ -48,7 +48,7 @@ $packages = @"
  -P gettext-devel,git,gnupg,gperf,libxml2-devel
  -P libpng12-devel,make,mintty,openssh,openssl,patch,perl
  -P pkg-config,readline,rsync,unzip,emacs,wget,zip
- -P perl-Archive-Zip,python,python3
+ -P perl-Archive-Zip,perl-Font-TTF,python,python3
 "@
 
 start $setup  "-B -N -n -q -d -D -L -X -s $site -l $temp -R $root $packages" -Wait
