@@ -5,6 +5,15 @@
 #    License: GPLv3
 #
 
+trap cleanup 1 2 3 6 15
+
+cleanup()
+{
+  echo "Caught Signal ... killing everything...."
+  # kill everything in same process group (pseudo-pid 0)
+  kill -9 0
+}
+
 die()
 {
     echo  "$@"
