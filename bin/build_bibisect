@@ -152,7 +152,7 @@ determine_todo_shas()
         die "cannot determine end sha"
     fi
     last_done_sha=${resume_sha}
-    todo_list=$(git log --first-parent --reverse --format="%H" ${last_build_sha}..${end_sha} | tail -n +1)
+    todo_list=$(git log --first-parent --reverse --format="%H" ${last_build_sha}..${end_sha} | tail -n +$range_commits)
     todo_n=$(echo "$todo_list" | wc -l)
     echo "build to do:$todo_n"
     popd > /dev/null
@@ -306,6 +306,7 @@ bibisect_epoch=
 count=
 move=
 fetch=
+range_commits=1
 
 os=$(uname -s)
 if [ "$os" != "Darwin" -a "$os" != "Linux" ] ; then
@@ -378,7 +379,10 @@ determine_todo_shas
 n=1
 has_error=0
 
-for sha in $todo_list ; do
+todo_list_array=(${todo_list})
+
+for ((i = 0; i < ${#todo_list_array[@]}; i = i + $range_commits)); do
+    sha=${todo_list_array[i]}
     build "$sha"
     if [ -n "$sha" ] ; then
         add_bibisect_$os
@@ -400,7 +404,7 @@ for sha in $todo_list ; do
         echo "Stopped."
         exit $has_error
     fi
-    n=$(($n + 1))
+    n=$(($n + $range_commits))
 done
 
 echo "Done."
