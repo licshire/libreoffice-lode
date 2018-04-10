@@ -376,7 +376,7 @@ determine_last_build_sha
 
 determine_todo_shas
 
-n=1
+n=$range_commits
 has_error=0
 
 todo_list_array=(${todo_list})
