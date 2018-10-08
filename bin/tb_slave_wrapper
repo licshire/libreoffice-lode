@@ -192,6 +192,9 @@ while [ "${1}" != "" ]; do
         --name)
             name="$arg"
             ;;
+        --target)
+            target="$arg"
+            ;;
         --uicheck)
             target="uicheck"
             ;;
